@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Seedling - Add Contacts</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;700&amp;family=Newsreader:opsz,wght@6..72,300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19c610", // Bright Green
+                        "sage": "#5A7D58", // Muted Sage
+                        "cream": "#F9F7F2", // Background
+                        "forest": "#2C362B", // Dark Text
+                        "stone": "#8B968D", // Muted Text
+                        "terracotta": "#D97C56", // Accent
+                        "pollen": "#E6D6A8", // Highlight
+                        "background-light": "#F9F7F2",
+                        "background-dark": "#112210",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "body": ["Newsreader", "serif"],
+                        "ui": ["Karla", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    boxShadow: {
+                        "soft": "0px 4px 20px rgba(90, 125, 88, 0.1)",
+                        "float": "0px 10px 30px rgba(90, 125, 88, 0.15)",
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar for the contact list */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-forest dark:text-cream min-h-screen flex items-center justify-center p-0 sm:p-4 font-display overflow-hidden">
+<!-- Main Mobile Container -->
+<div class="relative w-full max-w-md h-[100dvh] sm:h-[850px] bg-cream dark:bg-[#1a2e19] sm:rounded-[32px] shadow-2xl overflow-hidden flex flex-col">
+<!-- Header & Stepper -->
+<header class="px-6 pt-8 pb-4 bg-cream dark:bg-[#1a2e19] z-10">
+<!-- Navigation -->
+<div class="flex items-center justify-between mb-6">
+<button class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone/10 transition-colors">
+<span class="material-symbols-outlined text-stone">arrow_back</span>
+</button>
+<div class="flex items-center gap-2">
+<!-- Step 1 Indicator (Active) -->
+<div class="h-2 w-8 rounded-full bg-primary transition-all duration-300"></div>
+<!-- Step 2 Indicator (Inactive) -->
+<div class="h-2 w-2 rounded-full bg-primary/20 transition-all duration-300"></div>
+<!-- Step 3 Indicator (Inactive) -->
+<div class="h-2 w-2 rounded-full bg-primary/20 transition-all duration-300"></div>
+</div>
+<button class="font-ui font-bold text-sm text-sage hover:text-primary transition-colors">
+                    Cancel
+                </button>
+</div>
+<!-- Title -->
+<div class="space-y-1">
+<h1 class="text-3xl font-medium tracking-tight text-forest dark:text-white">
+                    Who would you like to plant?
+                </h1>
+<p class="text-stone dark:text-stone/80 text-lg font-normal">
+                    Select friends to add to your garden.
+                </p>
+</div>
+<!-- Search Bar -->
+<div class="mt-6 relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-stone">search</span>
+<input class="w-full pl-12 pr-4 py-4 bg-white dark:bg-white/5 border border-[#EBE7DD] dark:border-white/10 rounded-2xl font-ui text-base focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder-stone shadow-sm transition-all" placeholder="Search contacts..." type="text"/>
+</div>
+</header>
+<!-- Main Content: Contact List (Scrollable) -->
+<main class="flex-1 overflow-y-auto no-scrollbar px-6 pb-24 relative">
+<!-- Alphabet Section: A -->
+<div class="mb-6">
+<h2 class="font-ui text-xs font-bold text-stone uppercase tracking-wider mb-3 sticky top-0 bg-cream/95 dark:bg-[#1a2e19]/95 backdrop-blur-sm py-2 z-10">A</h2>
+<!-- Contact Item 1 (Selected) -->
+<div class="group flex items-center justify-between p-3 mb-2 bg-white dark:bg-white/5 rounded-2xl border border-primary dark:border-primary shadow-soft cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Portrait of a woman with short hair" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo5LZkBX73PSaJWcRw1IYjdQotn1qu1hEHgqRO3jS3xVo43itMLgYNzQD3YbVO94NoJ1HQVuabFLOTCsqE7Bmjc7_V_wqzwHd9Rnqjs-7efJEtnEYfiYkbl41RwZvm5_pv4Ruf110S-h_zXhLs-8KZbRtlT9Bhy1Nmnacmbwv8fKIGf5QqF8tv8ofymOOobsKy2D_vzgEPEA98OxQX700AYPeVYIlKKd9GN8SZobdWRT4wtvSJNFc4Fe0Z9j7olZ36kK3wHEglFSTK"/>
+<!-- Selected Indicator Badge -->
+<div class="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-0.5 border-2 border-white dark:border-[#1a2e19]">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+</div>
+<div>
+<h3 class="font-display font-medium text-lg text-forest dark:text-white">Alice Freeman</h3>
+<p class="font-ui text-xs text-stone">Mobile • +1 (555) 012-3456</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">check</span>
+</div>
+</div>
+<!-- Contact Item 2 -->
+<div class="group flex items-center justify-between p-3 mb-2 bg-white dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<img alt="Portrait of a man with glasses smiling" class="w-12 h-12 rounded-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDUXfuiW7VtRREOIfC8dNRFFPKZ1jBfGSnvYTlzGhJ_xYvPXwMLilfnNw4J_UpfRfkD_tIB6dwHtfg4-rYFpZ4G4BCSuToYwH_PfH5Rnsv-oKfzQUkyPKTPSF9yoPAGwic2G4SC5VHg1-EmJMd6HT_d8TvaXAyXfoWZZlbDPnxNfB_GUAPKZWckBEhl8nnMUWTXChWvf45Y1abXoFAHgxCyVUblfbM2_cvZwueUoxp_5ELIQ6o_geuXKS3ZWTa_B2XyCus_NrbJMFzj"/>
+<div>
+<h3 class="font-display font-medium text-lg text-forest dark:text-white">Arthur Dent</h3>
+<p class="font-ui text-xs text-stone">Home • +1 (555) 098-7654</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-stone/30 group-hover:border-primary transition-colors"></div>
+</div>
+</div>
+<!-- Alphabet Section: B -->
+<div class="mb-6">
+<h2 class="font-ui text-xs font-bold text-stone uppercase tracking-wider mb-3 sticky top-0 bg-cream/95 dark:bg-[#1a2e19]/95 backdrop-blur-sm py-2 z-10">B</h2>
+<!-- Contact Item 3 (Selected) -->
+<div class="group flex items-center justify-between p-3 mb-2 bg-white dark:bg-white/5 rounded-2xl border border-primary dark:border-primary shadow-soft cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Portrait of a young woman looking serious" class="w-12 h-12 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCh2eJD2bTaetZ2lUgXZ2KwEJmyfucdtRYgWZOz3zshFkUagdYEkNIdoLEtzfMc_mktbNvqB0_To4m4Ql0o7INuqf0lLyzkOZdm0z6i6AO62VP70e4mihVnrUPeWda9srNNOtc9_bcmHNX_jSHgDl99qlFnPYA7aR_TQMvDU8JyS1eqXm4mMVdRM7BWWbW4tyvyfylRjS23EUNXzajneLYjzjbWtcaw16cZ67_FV8iZdAhFTcV3M5VVehy94CQWx0QnEzcOzjsjm0d-"/>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white rounded-full p-0.5 border-2 border-white dark:border-[#1a2e19]">
+<span class="material-symbols-outlined text-[14px] font-bold">check</span>
+</div>
+</div>
+<div>
+<h3 class="font-display font-medium text-lg text-forest dark:text-white">Bella Swan</h3>
+<p class="font-ui text-xs text-stone">Mobile • +1 (555) 123-4567</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm">check</span>
+</div>
+</div>
+<!-- Contact Item 4 -->
+<div class="group flex items-center justify-between p-3 mb-2 bg-white dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-pollen/50 flex items-center justify-center text-sage font-display font-bold text-xl">
+                            B
+                        </div>
+<div>
+<h3 class="font-display font-medium text-lg text-forest dark:text-white">Ben Wyatt</h3>
+<p class="font-ui text-xs text-stone">Work • +1 (555) 222-3333</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-stone/30 group-hover:border-primary transition-colors"></div>
+</div>
+</div>
+<!-- Alphabet Section: C -->
+<div class="mb-6">
+<h2 class="font-ui text-xs font-bold text-stone uppercase tracking-wider mb-3 sticky top-0 bg-cream/95 dark:bg-[#1a2e19]/95 backdrop-blur-sm py-2 z-10">C</h2>
+<!-- Contact Item 5 -->
+<div class="group flex items-center justify-between p-3 mb-2 bg-white dark:bg-white/5 rounded-2xl border border-transparent hover:border-primary/30 shadow-sm hover:shadow-md cursor-pointer transition-all">
+<div class="flex items-center gap-4">
+<img alt="Portrait of a man with beard" class="w-12 h-12 rounded-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATV_AMJATPdDw2y8ZCEEb4FmOC5dD7EZtIbzoljyZ0_X1jnW7zlL9V2PUhdlCC3FOj2QzOvPbpD34WwSYKxgzgaHtSINFbrX89_e8keSg2MNMTrkTo084FfLMYst818u_yiWAG3mtA140GSjiIr6y47hsxHPEfFPFn0e0NzeuKvcKiYTRvttZeOyMyXbf_IM_TLMPVqEY1rsIv_sxRDDGELeKe7OnUtQ5gK_Js5IRTd--mXbt8WM4NBWPS3NNJaVA2QgUhptfHqirO"/>
+<div>
+<h3 class="font-display font-medium text-lg text-forest dark:text-white">Charlie Kelly</h3>
+<p class="font-ui text-xs text-stone">Mobile • +1 (555) 999-8888</p>
+</div>
+</div>
+<div class="w-6 h-6 rounded-full border-2 border-stone/30 group-hover:border-primary transition-colors"></div>
+</div>
+</div>
+<!-- Fade for content behind sticky bottom bar -->
+<div class="h-10"></div>
+</main>
+<!-- Bottom Action Bar (Sticky) -->
+<div class="absolute bottom-0 left-0 w-full bg-cream/90 dark:bg-[#1a2e19]/90 backdrop-blur-md border-t border-stone/10 p-6 z-20">
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-2 text-stone text-sm font-ui font-medium">
+<span class="bg-primary/20 text-primary px-2 py-0.5 rounded-full font-bold">2</span>
+<span>Selected</span>
+</div>
+<button class="flex-1 bg-primary hover:bg-[#15a80d] text-white font-ui font-bold text-base py-4 rounded-full shadow-lg shadow-primary/30 flex items-center justify-center gap-2 transition-all active:scale-95 group">
+<span>Continue to Planting</span>
+<span class="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Hidden Step 2 Preview (Simulated Modal Overlay for completeness of flow visualization) -->
+<!-- In a real app, this would be a separate screen or conditional render. Here it acts as the layer underneath ready to slide up -->
+<div class="absolute inset-0 bg-black/40 backdrop-blur-sm z-30 hidden">
+<!-- This would be the "Step 2" overlay logic if interactive -->
+</div>
+</div>
+<!-- Step 2 Simulation (Floating Card for Visual Context - Separate from main container to show design thought) -->
+<!-- Ideally, in a static output, showing one state is best. I will focus on the main state above but if the user asked for flow, I provide the primary screen. 
+         However, let's create a "Peek" of the categorization UI as a secondary element to show I understand the requirement. -->
+<div class="fixed bottom-4 right-4 sm:bottom-10 sm:right-10 w-80 bg-white dark:bg-[#1f361d] rounded-3xl shadow-float p-5 hidden sm:block border border-stone/10 transform rotate-2 hover:rotate-0 transition-transform duration-500 cursor-default">
+<div class="flex justify-between items-center mb-4">
+<h4 class="font-display font-bold text-forest dark:text-white">Next Step Preview</h4>
+<span class="bg-pollen text-forest text-[10px] font-ui font-bold px-2 py-1 rounded-full uppercase tracking-wide">Step 2</span>
+</div>
+<div class="bg-cream dark:bg-[#1a2e19] rounded-2xl p-4 border border-stone/10 mb-4">
+<div class="flex justify-center mb-2">
+<img alt="Avatar small" class="w-12 h-12 rounded-full border-2 border-white shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUMnEwS02jbVYfbhe6cBLY3PpEinUNxsaOKPLBxn1BW2hM77JyFT0jJBhh3S2ffH2oghr866Eiei_mfCk-8NXD4tMZwDf4x433DnSD-LN8fx9cS3jneezqOwLbtNa1fexa5Zh_WCTxQoQ79R-cleN0McnkCD6dibQtf-cjxvWRphGeTnLSFaRl8X2ZFgACop3oVKEq9HcGUK_mYwKamBNfJiBJFySl_FRyTAyVobdE3fReAkCwoyI4ussZudrzHq11TzVAOGpHSpiP"/>
+</div>
+<p class="text-center font-display font-medium text-sm mb-3">Planting <span class="text-primary">Alice</span></p>
+<!-- Frequency Slider Mini -->
+<div class="relative h-1 bg-stone/20 rounded-full mb-6 mx-2">
+<div class="absolute left-0 top-0 h-full w-1/3 bg-primary rounded-full"></div>
+<div class="absolute left-1/3 top-1/2 -translate-y-1/2 w-4 h-4 bg-primary border-2 border-white rounded-full shadow-sm z-10"></div>
+<!-- Labels -->
+<div class="absolute -bottom-5 left-0 -translate-x-1/2 text-[9px] font-ui text-primary font-bold">Inner</div>
+<div class="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[9px] font-ui text-stone/60">Mid</div>
+<div class="absolute -bottom-5 right-0 translate-x-1/2 text-[9px] font-ui text-stone/60">Outer</div>
+</div>
+</div>
+<button class="w-full bg-primary/10 text-primary font-ui font-bold text-xs py-2 rounded-lg">
+            Confirm Selection
+        </button>
+</div>
+</body></html>
