@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Garden - Relationship Map</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#19c610",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#112210",
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Newsreader', serif;
+        }
+        .ripple-ring {
+            border: 1px solid rgba(25, 198, 16, 0.2);
+        }
+        .orbit-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contact-avatar {
+            position: absolute;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-[#0e1b0d] dark:text-white min-h-screen flex flex-col">
+<!-- Top Navigation / Search -->
+<header class="p-4 flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">filter_vintage</span>
+<h1 class="text-2xl font-bold tracking-tight">My Garden</h1>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary/60">search</span>
+<input class="w-full bg-white dark:bg-white/5 border-none rounded-xl py-3 pl-12 pr-4 shadow-sm focus:ring-2 focus:ring-primary/50 font-display italic" placeholder="Find someone in your rings..." type="text"/>
+</div>
+</header>
+<!-- Relationship Map View -->
+<main class="flex-1 flex flex-col items-center justify-center px-4 overflow-hidden relative">
+<div class="orbit-container max-w-md w-full">
+<!-- Central Core -->
+<div class="z-30 w-16 h-16 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30 border-4 border-white dark:border-background-dark">
+<span class="material-symbols-outlined text-white text-3xl">potted_plant</span>
+</div>
+<!-- Inner Circle Ring (240px) -->
+<div class="absolute w-[180px] h-[180px] rounded-full ripple-ring flex items-center justify-center">
+<span class="absolute -top-6 text-xs font-bold uppercase tracking-widest text-primary/60">Inner Circle</span>
+<!-- Inner Circle Contacts -->
+<div class="contact-avatar left-[15%] top-[25%]">
+<img class="w-12 h-12 rounded-full border-2 border-primary shadow-sm" data-alt="Close friend profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHZErn_3-dWKSZ5jzlFHIrhVmANqxvGJaSjDmho3j9pI-BKwbQktnJGmFtknh_1mVrbrCLmXh4eH5_A57ph1F5GaGLhBkJXFUV8qimcdF84m-DeeICofLmbwEmAdjdRzRvMsKzLYya87eMgRMMvJYg-qV6dlx5d77xhQKREESKCnR0HfuZnce6NKPhVLQD4SCQEVJU_nNG8srI32wLxdB33Kbk10v03pXBULbie4qM1XsfZvTuH6KKUO9vqlURvQ-PMZkMpZamumCm"/>
+</div>
+<div class="contact-avatar right-[5%] top-[50%]">
+<img class="w-12 h-12 rounded-full border-2 border-primary shadow-sm" data-alt="Family member profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDpgIbMLFcub60MlAlnA9_A0KutKbu0VS2_TRkr_xYIWI4sMmwSy6ajGiI3KwX7PqKQ9ia15pE91tvqCphpI4I5xIiXnf8jx78SCRIYcLIabmZ4WhTRBVCvaq5jOLxr764oRQ8MXf2peWuct-Q_VHb4_bLJbBodKynGUvn3xaADSOhUETBcxGRlMBXHC4I6fquhEH-guepbzxNcr1bNlSOIfQhJMUM4y2r4ZC5HrtcBxV8-y1E-aSyqAhqI0DLGgC6-hgsqeMLy6uWE"/>
+</div>
+<div class="contact-avatar left-[50%] bottom-[-5%]">
+<img class="w-12 h-12 rounded-full border-2 border-primary shadow-sm" data-alt="Best friend profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkCwV1ZNOemjWl5TMH-m_0ebwWYzyBQME2Cg66RflzJun396xO_pMzNL0bBO8B1auGIv46PNCOZ3XwQfdeI-86J0pa_elDYkLtsIgRhjmDSj-NlPp207cRL4oiyZZ6J6uuGAbCQxanFaFhbNNGyFmUC8U3-WrEBH__F7eawYNT4ZWjiSfyJ_aD52oVZ_q8hvtu833xkWfzCOtSodSCAVPTfrJIOfbS06lRc7u8wMHvHia4IuuxyGVw1vBjggU4VZL9zgRSyeWgLCTf"/>
+</div>
+</div>
+<!-- Mid Circle Ring (380px) -->
+<div class="absolute w-[300px] h-[300px] rounded-full ripple-ring flex items-center justify-center">
+<span class="absolute top-[10%] -left-4 -rotate-45 text-[10px] font-bold uppercase tracking-widest text-primary/40">Mid Circle</span>
+<!-- Mid Circle Contacts -->
+<div class="contact-avatar left-[10%] top-[70%]">
+<img class="w-10 h-10 rounded-full border-2 border-primary/40 shadow-sm" data-alt="Colleague profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDielH4LSD6qvuxq2Jktl1wqTUjefx--G3xvkYdOIxtzR_XrlMsevyc4ZQ2pHGpxlGGt_LtBgTrWKkwxKLRmR-lp3w_oDhYw0u0PBN0tqLgrQBeeZ0x-bjvNJipql4Zhmeh0mPieMqcB9sanvDirlO-2pValn0pNYd2MpwhhNceR5clKjsRff-1oj6E_DHm1Xdk3U9u__SoFmHAhGbyMzmZv6uz0dqw_YxS_K12auKE0FqdAJbOchLgY8DqNG1ytGIadQ-0xpnrP0TS"/>
+</div>
+<div class="contact-avatar right-[10%] top-[20%]">
+<img class="w-10 h-10 rounded-full border-2 border-primary/40 shadow-sm" data-alt="Close acquaintance profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuANTxZJmyfvKCUA0mgtl3aKmhdPKxNyd0I_9DWpu9JddAAFjZLJAQCQH447tX5CdyExu2KvUAj6-7oFH3D_k_Jt2NFH4cpbERmgb-xn8fiali_NUnVHvwFUejoxWdE7h0dOFWlRSw8v0PxG7zJk-vU8L0wQCjS9TKllQgR92Js2EeV8Yx-s0KcYTAcHnx9rZuR6fu1VoBpJWdl-WdhbTkWAbXrfBv0cwSX7aLPxs3jblfBVrXjSQKemSaLuOUfKxPNbmRgaNO7t92J0"/>
+</div>
+<div class="contact-avatar right-[25%] bottom-[5%]">
+<img class="w-10 h-10 rounded-full border-2 border-primary/40 shadow-sm" data-alt="Activity partner profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi2rIBvnajDUyEHoKmWnPRulsgD9u5n2Ex9uomE7Hmpiyc9IIDctlnr-q-gwpUUAMFvUGRv7C6ltdmpEL00HT4eIFPQToInw4fPfZ-gZ0M3PX9nfFg8MtrteqLEcSsn1y3zmWgseltrzfDse9IrSzIgKJd2JT3CbXl4003m-FqXYs9gnU-QJvGLtzbT_3h7SlNAw5W5Z44ytAF0JccHGN44yftWdS7nHclrCZdq-lDCx6Pvv2gt2IHTmMNHHrPj4YzKtGIonk2FGz-"/>
+</div>
+<div class="contact-avatar left-[40%] top-[0%]">
+<img class="w-10 h-10 rounded-full border-2 border-primary/40 shadow-sm" data-alt="Friend from college profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOoRAMh5wKdZJWppB81mFioSwmQCiOBovlggm3YUdxEKxwHJU6AqWGEZTTZ1Y457ddes09bJvGM6-6hssImwQXdv0ln8s0hEoQ8MNSxoa4MBTTvFnUiUAQF6B5Vm-RS7duwk-rV5U3WMwFSLP8MrEUiqnCPdrRfwN6MgLHY0k5B1gQFaFwo9BJteP9myZ6nlrf0j88pC9I92Y2glsWgYrF8s-kKYRVM7cDAacrHAJH2qxh5Yr2Agnu0tel_rU5yCSZf3OG3kFlM-Y9"/>
+</div>
+</div>
+<!-- Outer Circle Ring (520px) -->
+<div class="absolute w-[420px] h-[420px] rounded-full ripple-ring border-dashed flex items-center justify-center">
+<span class="absolute bottom-8 right-0 rotate-12 text-[10px] font-bold uppercase tracking-widest text-primary/30">Outer Circle</span>
+<!-- Outer Circle Contacts -->
+<div class="contact-avatar left-[50%] top-[-2%]">
+<img class="w-8 h-8 rounded-full border border-primary/20 opacity-80" data-alt="Distant acquaintance profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAL5J4UouXrO78bkVh8cO333ISuN_l0J1cXxbnIhNrE9FTWFEMxSexv-ikERktjdyOvSrQpxuz_scOwRb6aoGwsvPEVXLwcB2QSuKNq0IyljJw5pyNX2mA-Mw6JaOr6NM5cGe_ljTrkkyJCf999C18J1qUhFQqnKOpUuia6mbJM8_duTRykjL-wZdNHG8l-XXFVpRMho_WHccoU7lXYLmIxZywMAjeluulDsXKXI1jSJG6HRfVKB9d_Mspu8C-B1J928sD68iu6iZVD"/>
+</div>
+<div class="contact-avatar left-[5%] top-[40%]">
+<img class="w-8 h-8 rounded-full border border-primary/20 opacity-80" data-alt="Professional network profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0ov7SlW9RdcHuR2onj39EKiUn14Z9D_y5T1mR4GBME80uca9v77x3S88Edf-02AjxXpcEI1RMyQA-V0ZXROBTfhLYO10qSC6lsvMghjiaPyq2tIvzX1BIIuq7lIID-r4X0dcQhtIE2luTH1ByRMocLR9FaWpQSlLBHoPPLws3c1s43OkRW35WkHC90-GoyGEadoRgbGqHMplA8ZS90_wQQZyZOPXWprncj1I2aVs_pcEqy-ie9AbzFaogo98DPTNm9XUuv7N0-aIJ"/>
+</div>
+<div class="contact-avatar right-[5%] bottom-[30%]">
+<img class="w-8 h-8 rounded-full border border-primary/20 opacity-80" data-alt="Casual contact profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVnmser78XJaTdj1xSk3n01esXvvEg9y-seXEWafMuwupW7AbuifNQ2dxJNIvBod4xQ2njjwoPTNoO2MxhtCT22unK2tel2LZgbRqB86OT7Sw0GrTssWV0M24tQG3Vz-JozVht3BTdEkaeKZiEtKPUt7ac_zIvFZUhJ0-OGSUZ31qYW4im0n1wg8v1UV-AcQNu5ZVW9scT58ST1BVVfXZ4YQat6YROImoYIjBnRppb-bkSfPplKlwPj500VREwE3eAkU4I97_k9yzC"/>
+</div>
+<div class="contact-avatar left-[20%] bottom-[10%]">
+<img class="w-8 h-8 rounded-full border border-primary/20 opacity-80" data-alt="Old friend profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0dViLWDDH3kgE0T7BsXHpA63WvnmkwG9-gd83PeDPO1scH1bgfd5HZz__TZa0i2wwXkxX9VUA8xwX1QKrN_OQL1b1VdQLnI23sPQxZvAeu8IfT4bG7ZCCVQ-vgBq34RTCLTlY1_EqGoS4aefwkoUYYAzG5ef1vZ8eJ8O3zNUhS38SilMnT4RQFHTE3uT0ko63aS4CbUrDmEkT6FG9egBJpfq93WWmFfYs8PhJYDlZe3PtVfD3DlQrfuA-jz3x2IPHyXQY5i7RmeTG"/>
+</div>
+</div>
+</div>
+<!-- Quick Status Card (Tapped State Simulation) -->
+<div class="mt-8 bg-white dark:bg-white/5 p-4 rounded-xl border border-primary/10 shadow-xl w-full max-w-xs flex items-center gap-4">
+<div class="relative">
+<img class="w-14 h-14 rounded-full border-2 border-primary" data-alt="Sarah profile picture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUos2s6RFj9Kv150F9yqa1BIUuZGS11ryuvGOhfPI7l4BZ82rDJl3Ewofj3bcLrAUObT7B6qBXxWTmXTfwodatu2PoUHhE-sF3VUIqflEpf3vMUq2d9cpBpnijyWGHHMfblccFSfWM_yCy6JmkAeZpv0Id2LzIEsh82Z1FsUnsZUyp1ZTrGbhn0-tjEijfZ4XV4GDUn4_R-XbQBEHPr-4izt6F-okfZTf4216qKyZhZIJZuMW0OZSBtjL3BNXGiwhGl2Utmm68PIr3"/>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">Inner</div>
+</div>
+<div class="flex-1">
+<h3 class="font-bold text-lg">Sarah Jenkins</h3>
+<p class="text-sm text-primary/70 font-display italic">Last watered 2 days ago</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">chat_bubble</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-t border-primary/10 px-6 py-3 flex items-center justify-between pb-8">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined fill-1">potted_plant</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Garden</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">bar_chart</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Stats</span>
+</a>
+<!-- Add Button (Elevated) -->
+<div class="relative -top-6">
+<button class="w-14 h-14 bg-primary text-white rounded-full shadow-xl shadow-primary/40 flex items-center justify-center border-4 border-background-light dark:border-background-dark">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+<a class="flex flex-col items-center gap-1 text-primary/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Talk</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/40 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-wider">Tools</span>
+</a>
+</nav>
+<!-- Floating Legend -->
+<div class="fixed bottom-24 right-4 flex flex-col gap-2">
+<div class="bg-white/90 dark:bg-white/10 backdrop-blur px-3 py-2 rounded-lg border border-primary/20 flex flex-col gap-1 shadow-sm">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-[10px] font-bold opacity-60">Needs Water</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary/30"></span>
+<span class="text-[10px] font-bold opacity-60">Thriving</span>
+</div>
+</div>
+</div>
+</body></html>
