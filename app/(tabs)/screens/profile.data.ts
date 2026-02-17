@@ -70,13 +70,6 @@ export const profileSections: ProfileSection[] = [
         title: 'Fuzzy Reminders',
         subtitle: 'Natural, non-rigid notifications',
       },
-      {
-        id: 'quiet-hours',
-        type: 'chevron',
-        icon: 'dark-mode',
-        title: 'Quiet Hours / Snooze',
-        subtitle: 'No alerts during resting time',
-      },
     ],
   },
   {
@@ -119,4 +112,3 @@ export const profileActions = [
     tone: 'orange' as const,
   },
 ];
-

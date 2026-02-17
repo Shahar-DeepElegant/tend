@@ -8,6 +8,7 @@ import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-sy
 
 import { profileActions, profileHeader, profileSections, type ProfileRow, type ProfileToggleId } from './profile.data';
 import { CustomCirclesModal } from './profile/custom-circles-modal';
+import { ReminderFrequencyModal } from './profile/reminder-frequency-modal';
 
 export function ProfileScreen() {
   const [toggles, setToggles] = useState<Record<ProfileToggleId, boolean>>({
@@ -15,9 +16,20 @@ export function ProfileScreen() {
     automaticLogMode: false,
   });
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
+  const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
 
   const updateToggle = (toggleId: ProfileToggleId, value: boolean) => {
     setToggles((current) => ({ ...current, [toggleId]: value }));
+  };
+
+  const handleRowPress = (rowId: string) => {
+    if (rowId === 'custom-circles') {
+      setCustomCirclesOpen(true);
+      return;
+    }
+    if (rowId === 'reminder-frequency') {
+      setReminderFrequencyOpen(true);
+    }
   };
 
   return (
@@ -52,7 +64,7 @@ export function ProfileScreen() {
                     row={row}
                     toggleValue={row.type === 'toggle' ? toggles[row.toggleId] : false}
                     onToggle={updateToggle}
-                    onPress={row.id === 'custom-circles' ? () => setCustomCirclesOpen(true) : undefined}
+                    onPress={row.type === 'chevron' ? () => handleRowPress(row.id) : undefined}
                   />
                   {index < section.rows.length - 1 ? <View style={styles.rowDivider} /> : null}
                 </View>
@@ -114,6 +126,7 @@ export function ProfileScreen() {
       </ScrollView>
 
       <CustomCirclesModal visible={customCirclesOpen} onClose={() => setCustomCirclesOpen(false)} />
+      <ReminderFrequencyModal visible={reminderFrequencyOpen} onClose={() => setReminderFrequencyOpen(false)} />
     </SafeAreaView>
   );
 }
