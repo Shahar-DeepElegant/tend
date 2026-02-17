@@ -10,6 +10,7 @@ import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
 
 import { groveContacts, type GroveContact } from './garden.data';
+import { AddContactModal } from './up-next/add-contact-modal';
 
 export function GardenScreen() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export function GardenScreen() {
   const MAX_ZOOM = 2.2;
   const ZOOM_STEP = 0.2;
   const [zoom, setZoom] = useState(1);
+  const [addOpen, setAddOpen] = useState(false);
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const reportedScale = useSharedValue(1);
@@ -164,6 +166,12 @@ export function GardenScreen() {
           <GardenText variant="meta">Thriving</GardenText>
         </View>
       </View>
+
+      <Pressable style={styles.fab} onPress={() => setAddOpen(true)} accessibilityLabel="Add person to circle">
+        <MaterialIcons name="add" size={30} color={GardenColors.white} />
+      </Pressable>
+
+      <AddContactModal visible={addOpen} onClose={() => setAddOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -310,6 +318,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    marginBottom: 56,
   },
   zoomControls: {
     position: 'absolute',
@@ -441,5 +450,21 @@ const styles = StyleSheet.create({
   },
   legendDotMuted: {
     backgroundColor: '#BBD2BA',
+  },
+  fab: {
+    position: 'absolute',
+    right: GardenSpacing.md,
+    bottom: 96,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: GardenColors.sage,
+    shadowColor: GardenColors.sage,
+    shadowOpacity: 0.25,
+    shadowOffset: { width: 0, height: 10 },
+    shadowRadius: 20,
+    elevation: 7,
   },
 });
