@@ -7,12 +7,14 @@ import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
 
 import { profileActions, profileHeader, profileSections, type ProfileRow, type ProfileToggleId } from './profile.data';
+import { CustomCirclesModal } from './profile/custom-circles-modal';
 
 export function ProfileScreen() {
   const [toggles, setToggles] = useState<Record<ProfileToggleId, boolean>>({
     fuzzyReminders: true,
     automaticLogMode: false,
   });
+  const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
 
   const updateToggle = (toggleId: ProfileToggleId, value: boolean) => {
     setToggles((current) => ({ ...current, [toggleId]: value }));
@@ -46,7 +48,12 @@ export function ProfileScreen() {
             <View style={styles.card}>
               {section.rows.map((row, index) => (
                 <View key={row.id}>
-                  <ProfileRowItem row={row} toggleValue={row.type === 'toggle' ? toggles[row.toggleId] : false} onToggle={updateToggle} />
+                  <ProfileRowItem
+                    row={row}
+                    toggleValue={row.type === 'toggle' ? toggles[row.toggleId] : false}
+                    onToggle={updateToggle}
+                    onPress={row.id === 'custom-circles' ? () => setCustomCirclesOpen(true) : undefined}
+                  />
                   {index < section.rows.length - 1 ? <View style={styles.rowDivider} /> : null}
                 </View>
               ))}
@@ -105,6 +112,8 @@ export function ProfileScreen() {
           <MaterialIcons name="eco" size={30} color="#9AAC98" />
         </View>
       </ScrollView>
+
+      <CustomCirclesModal visible={customCirclesOpen} onClose={() => setCustomCirclesOpen(false)} />
     </SafeAreaView>
   );
 }
@@ -113,13 +122,19 @@ function ProfileRowItem({
   row,
   toggleValue,
   onToggle,
+  onPress,
 }: {
   row: ProfileRow;
   toggleValue: boolean;
   onToggle: (toggleId: ProfileToggleId, value: boolean) => void;
+  onPress?: () => void;
 }) {
   return (
-    <View style={styles.row}>
+    <Pressable
+      style={styles.row}
+      onPress={onPress}
+      disabled={!onPress}
+      accessibilityRole={onPress ? 'button' : undefined}>
       <View style={styles.rowLeft}>
         <View style={styles.rowIconWrap}>
           <MaterialIcons name={row.icon} size={20} color={GardenColors.sage} />
@@ -151,7 +166,7 @@ function ProfileRowItem({
           </GardenText>
         </View>
       ) : null}
-    </View>
+    </Pressable>
   );
 }
 
