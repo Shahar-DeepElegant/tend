@@ -1,5 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
@@ -11,6 +12,7 @@ import { AddContactModal } from './up-next/add-contact-modal';
 import { initialSections, type ReminderCard, type ReminderSection } from './up-next.data';
 
 export function UpNextScreen() {
+  const router = useRouter();
   const [sections] = useState<ReminderSection[]>(initialSections);
   const [doneIds, setDoneIds] = useState<string[]>([]);
   const [addOpen, setAddOpen] = useState(false);
@@ -70,7 +72,13 @@ export function UpNextScreen() {
               section.items
                 .filter((item) => !isDone(item.id))
                 .map((item) => (
-                  <ReminderRow key={item.id} item={item} onMarkDone={() => markDone(item.id)} />
+                  <ReminderRow
+                    key={item.id}
+                    item={item}
+                    onMarkDone={() => markDone(item.id)}
+                    onOpenProfile={() => router.push('/leaf-profile')}
+                    onWater={() => router.push('/watering')}
+                  />
                 ))
             )}
           </View>
@@ -86,7 +94,17 @@ export function UpNextScreen() {
   );
 }
 
-function ReminderRow({ item, onMarkDone }: { item: ReminderCard; onMarkDone: () => void }) {
+function ReminderRow({
+  item,
+  onMarkDone,
+  onOpenProfile,
+  onWater,
+}: {
+  item: ReminderCard;
+  onMarkDone: () => void;
+  onOpenProfile: () => void;
+  onWater: () => void;
+}) {
   return (
     <Swipeable
       containerStyle={styles.swipeContainer}
@@ -108,33 +126,35 @@ function ReminderRow({ item, onMarkDone }: { item: ReminderCard; onMarkDone: () 
       )}>
       <GardenCard overdue={item.overdue} style={styles.card}>
         <View style={styles.row}>
-          <View style={styles.avatarWrap}>
-            {item.image ? (
-              <Image source={item.image} style={styles.avatar} />
-            ) : (
-              <View style={styles.initialAvatar}>
-                <GardenText variant="button" color={GardenColors.sage}>
-                  {item.initials}
-                </GardenText>
-              </View>
-            )}
-            {item.overdue ? (
-              <View style={styles.overdueBadge}>
-                <GardenText variant="button" color="#fff">
-                  !
-                </GardenText>
-              </View>
-            ) : null}
-          </View>
-          <View style={styles.copyCol}>
-            <GardenText variant="section" style={styles.nameText}>
-              {item.name}
-            </GardenText>
-            <GardenText variant="meta" color={item.overdue ? GardenColors.terracotta : GardenColors.stone}>
-              {item.lastSpoke}
-            </GardenText>
-          </View>
-          <PillButton tone={item.overdue ? 'primary' : 'ghost'} onPress={() => {}}>
+          <Pressable style={styles.touchArea} onPress={onOpenProfile}>
+            <View style={styles.avatarWrap}>
+              {item.image ? (
+                <Image source={item.image} style={styles.avatar} />
+              ) : (
+                <View style={styles.initialAvatar}>
+                  <GardenText variant="button" color={GardenColors.sage}>
+                    {item.initials}
+                  </GardenText>
+                </View>
+              )}
+              {item.overdue ? (
+                <View style={styles.overdueBadge}>
+                  <GardenText variant="button" color="#fff">
+                    !
+                  </GardenText>
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.copyCol}>
+              <GardenText variant="section" style={styles.nameText}>
+                {item.name}
+              </GardenText>
+              <GardenText variant="meta" color={item.overdue ? GardenColors.terracotta : GardenColors.stone}>
+                {item.lastSpoke}
+              </GardenText>
+            </View>
+          </Pressable>
+          <PillButton tone={item.overdue ? 'primary' : 'ghost'} onPress={onWater}>
             <MaterialIcons
               name="water-drop"
               size={22}
@@ -209,6 +229,12 @@ const styles = StyleSheet.create({
     paddingVertical: GardenSpacing.sm,
   },
   row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: GardenSpacing.sm,
+  },
+  touchArea: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     gap: GardenSpacing.sm,

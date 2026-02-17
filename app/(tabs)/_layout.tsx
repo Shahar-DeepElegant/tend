@@ -34,6 +34,18 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="leaf-profile"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="watering"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

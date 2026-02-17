@@ -1,0 +1,371 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Sarah Jenkins - Garden Profile</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&amp;family=Young+Serif&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+      rel="stylesheet"
+    />
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              primary: "#ec5b13",
+              sage: {
+                DEFAULT: "#5A7D58",
+                light: "#7A9D78",
+                dark: "#3A5D38",
+                bg: "#E8F0E8",
+              },
+              cream: {
+                DEFAULT: "#F9F7F2",
+                dark: "#F0EBE0",
+              },
+              "background-light": "#F9F7F2",
+              "background-dark": "#1a1f1a",
+            },
+            fontFamily: {
+              display: ["Young Serif", "serif"],
+              sans: ["Public Sans", "sans-serif"],
+            },
+            borderRadius: {
+              DEFAULT: "0.25rem",
+              lg: "0.5rem",
+              xl: "1rem",
+              "2xl": "1.5rem",
+              "3xl": "2rem",
+              full: "9999px",
+            },
+            boxShadow: {
+              soft: "0 4px 20px -2px rgba(90, 125, 88, 0.1)",
+              glow: "0 0 15px rgba(90, 125, 88, 0.3)",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      .font-serif-display {
+        font-family: "Young Serif", serif;
+      }
+      /* Hide scrollbar for clean UI */
+      ::-webkit-scrollbar {
+        width: 0px;
+        background: transparent;
+      }
+    </style>
+    <style>
+      body {
+        min-height: max(884px, 100dvh);
+      }
+    </style>
+  </head>
+  <body
+    class="bg-background-light dark:bg-background-dark text-[#2c3e2d] dark:text-[#e0e5df] min-h-screen relative overflow-x-hidden font-sans antialiased selection:bg-sage selection:text-white"
+  >
+    <!-- Top App Bar -->
+    <div
+      class="sticky top-0 z-50 flex items-center justify-between p-6 pb-2 bg-background-light/90 dark:bg-background-dark/90 backdrop-blur-md"
+    >
+      <button
+        class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-sage-bg/50 dark:hover:bg-sage-dark/30 transition-colors text-sage dark:text-sage-light"
+      >
+        <span class="material-symbols-outlined" style="font-size: 28px"
+          >arrow_back</span
+        >
+      </button>
+      <button
+        class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-sage-bg/50 dark:hover:bg-sage-dark/30 transition-colors text-sage dark:text-sage-light"
+      >
+        <span class="material-symbols-outlined" style="font-size: 24px"
+          >edit</span
+        >
+      </button>
+    </div>
+    <!-- Main Content Container -->
+    <main class="flex flex-col w-full max-w-md mx-auto px-6 pb-24 space-y-8">
+      <!-- Profile Section -->
+      <div class="flex flex-col items-center gap-4 mt-2">
+        <div class="relative group">
+          <!-- Avatar Ring -->
+          <div
+            class="absolute -inset-1 bg-gradient-to-br from-sage-light to-sage rounded-full opacity-30 blur-sm group-hover:opacity-50 transition-opacity"
+          ></div>
+          <!-- Avatar Image -->
+          <div
+            class="relative w-32 h-32 rounded-full border-4 border-white dark:border-[#2a302a] overflow-hidden shadow-soft"
+          >
+            <img
+              alt="Woman with curly hair smiling"
+              class="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnteBJF8IRgTsshFjKyWXlXIUiBgZlTUDaxYvok7Cmvy_T2gA4tK_OoL0MRtEStkx7GOUlg07YuBn_0b3LtI8bFg33gHi5qs63M4rlsCTrfyyDP-c7L-oIy_Vx2w6FGVsFGltmNKHfBVd_dPQCFjGIQXhzj-bnIh81uY4pODb7Fo8Opkop8jJK9Y7A3vStpzAxS3II7Ryyo1nK8dDpQBrNIxRkoVkwmxnnMGgC3pQZlL9cKQLU4RwXhuwvUuc9VF1OnsE82Vwwc6bJ"
+            />
+          </div>
+          <!-- Status Badge -->
+          <div
+            class="absolute bottom-1 right-1 bg-white dark:bg-[#2a302a] rounded-full p-1.5 shadow-md"
+          >
+            <span
+              class="material-symbols-outlined text-sage-light"
+              style="
+                font-size: 20px;
+                font-variation-settings: &quot;FILL&quot; 1;
+              "
+              >eco</span
+            >
+          </div>
+        </div>
+        <div class="flex flex-col items-center text-center space-y-1">
+          <h1
+            class="text-3xl font-serif-display text-[#1e2b1f] dark:text-[#f0f5f0]"
+          >
+            Sarah Jenkins
+          </h1>
+          <span
+            class="px-4 py-1.5 bg-sage-bg dark:bg-sage-dark/30 text-sage-dark dark:text-sage-light text-xs font-bold tracking-wider rounded-full uppercase"
+            >College Friend</span
+          >
+        </div>
+      </div>
+      <!-- Quick Actions -->
+      <div class="grid grid-cols-3 gap-3">
+        <button
+          class="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl border border-sage/20 dark:border-sage-light/20 text-sage-dark dark:text-sage-light hover:bg-sage-bg dark:hover:bg-sage-dark/20 transition-all"
+        >
+          <span class="material-symbols-outlined">call</span>
+          <span class="text-xs font-medium">Call</span>
+        </button>
+        <button
+          class="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl border border-sage/20 dark:border-sage-light/20 text-sage-dark dark:text-sage-light hover:bg-sage-bg dark:hover:bg-sage-dark/20 transition-all"
+        >
+          <span class="material-symbols-outlined">chat_bubble</span>
+          <span class="text-xs font-medium">Message</span>
+        </button>
+        <button
+          class="flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-2xl bg-sage text-white shadow-soft shadow-sage/40 hover:bg-sage-dark transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          <span
+            class="material-symbols-outlined"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >water_drop</span
+          >
+          <span class="text-xs font-medium">Log Water</span>
+        </button>
+      </div>
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-2 gap-4">
+        <div
+          class="bg-white dark:bg-[#232923] p-5 rounded-3xl shadow-sm border border-sage/10 dark:border-white/5 flex flex-col gap-1"
+        >
+          <p
+            class="text-xs font-bold text-sage/80 dark:text-sage-light/80 uppercase tracking-wide"
+          >
+            Last Spoke
+          </p>
+          <p class="text-xl font-serif-display text-[#1e2b1f] dark:text-white">
+            3 days ago
+          </p>
+        </div>
+        <div
+          class="bg-white dark:bg-[#232923] p-5 rounded-3xl shadow-sm border border-sage/10 dark:border-white/5 flex flex-col gap-1"
+        >
+          <p
+            class="text-xs font-bold text-sage/80 dark:text-sage-light/80 uppercase tracking-wide"
+          >
+            Streak
+          </p>
+          <p class="text-xl font-serif-display text-[#1e2b1f] dark:text-white">
+            4 months
+          </p>
+        </div>
+      </div>
+      <!-- Watering Schedule -->
+      <div
+        class="bg-white dark:bg-[#232923] p-1 rounded-3xl shadow-sm border border-sage/10 dark:border-white/5"
+      >
+        <div class="flex items-center justify-between p-4">
+          <div class="flex items-center gap-4">
+            <div
+              class="w-12 h-12 rounded-2xl bg-sage-bg dark:bg-sage-dark/30 flex items-center justify-center text-sage dark:text-sage-light"
+            >
+              <span class="material-symbols-outlined">autorenew</span>
+            </div>
+            <div>
+              <p
+                class="font-serif-display text-lg text-[#1e2b1f] dark:text-white"
+              >
+                Every 2 Weeks
+              </p>
+              <p class="text-sm text-sage/80 dark:text-sage-light/70">
+                Next: Oct 24 (Tuesday)
+              </p>
+            </div>
+          </div>
+          <button
+            class="w-8 h-8 flex items-center justify-center text-sage/60 hover:text-sage dark:text-white/40 dark:hover:text-white transition-colors"
+          >
+            <span class="material-symbols-outlined">expand_more</span>
+          </button>
+        </div>
+      </div>
+      <!-- The Soil (Notes) -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2 px-2">
+          <span
+            class="material-symbols-outlined text-sage"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >psychology_alt</span
+          >
+          <h2
+            class="font-serif-display text-xl text-[#1e2b1f] dark:text-[#f0f5f0]"
+          >
+            The Soil
+          </h2>
+        </div>
+        <div
+          class="bg-[#F2EFE9] dark:bg-[#2a302a] p-6 rounded-3xl relative group border border-sage/5 dark:border-white/5"
+        >
+          <button
+            class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/50 dark:bg-black/20 hover:bg-white dark:hover:bg-black/40 flex items-center justify-center text-sage-dark dark:text-sage-light transition-all opacity-0 group-hover:opacity-100"
+          >
+            <span class="material-symbols-outlined" style="font-size: 16px"
+              >edit</span
+            >
+          </button>
+          <p class="text-[#4a554a] dark:text-[#c0c5c0] leading-relaxed italic">
+            "Sarah loves Earl Grey tea (extra hot). Her son Leo just started
+            kindergarten. Remember to ask about her pottery class next time."
+          </p>
+        </div>
+      </section>
+      <!-- Growth Rings (History) -->
+      <section class="space-y-4">
+        <div class="flex items-center gap-2 px-2">
+          <span
+            class="material-symbols-outlined text-sage"
+            style="font-variation-settings: &quot;FILL&quot; 1"
+            >history_edu</span
+          >
+          <h2
+            class="font-serif-display text-xl text-[#1e2b1f] dark:text-[#f0f5f0]"
+          >
+            Growth Rings
+          </h2>
+        </div>
+        <div class="relative pl-4 space-y-8">
+          <!-- Vertical Line -->
+          <div
+            class="absolute left-[27px] top-4 bottom-4 w-0.5 bg-sage/20 dark:bg-sage-light/20 rounded-full"
+          ></div>
+          <!-- Event 1 -->
+          <div class="relative flex gap-4 items-start group">
+            <div
+              class="relative z-10 w-6 h-6 rounded-full bg-sage flex items-center justify-center shrink-0 mt-0.5 ring-4 ring-background-light dark:ring-background-dark"
+            >
+              <span
+                class="material-symbols-outlined text-white"
+                style="font-size: 14px"
+                >local_cafe</span
+              >
+            </div>
+            <div class="flex-1 pb-2">
+              <div class="flex justify-between items-baseline mb-1">
+                <h3 class="font-bold text-[#1e2b1f] dark:text-white">
+                  Coffee Catch-up
+                </h3>
+                <span
+                  class="text-xs font-medium text-sage/70 dark:text-sage-light/60"
+                  >Oct 12</span
+                >
+              </div>
+              <p
+                class="text-sm text-[#5a655a] dark:text-[#a0a5a0] leading-relaxed"
+              >
+                Met at the downtown cafe. She's really enjoying her new role at
+                the agency.
+              </p>
+            </div>
+          </div>
+          <!-- Event 2 -->
+          <div class="relative flex gap-4 items-start group">
+            <div
+              class="relative z-10 w-6 h-6 rounded-full bg-background-light dark:bg-background-dark border-2 border-sage dark:border-sage-light flex items-center justify-center shrink-0 mt-0.5 ring-4 ring-background-light dark:ring-background-dark"
+            >
+              <span
+                class="material-symbols-outlined text-sage dark:text-sage-light"
+                style="font-size: 14px"
+                >call</span
+              >
+            </div>
+            <div class="flex-1 pb-2">
+              <div class="flex justify-between items-baseline mb-1">
+                <h3 class="font-bold text-[#1e2b1f] dark:text-white">
+                  Quick Call
+                </h3>
+                <span
+                  class="text-xs font-medium text-sage/70 dark:text-sage-light/60"
+                  >Sept 28</span
+                >
+              </div>
+              <p
+                class="text-sm text-[#5a655a] dark:text-[#a0a5a0] leading-relaxed"
+              >
+                Called to wish her luck on the presentation.
+              </p>
+            </div>
+          </div>
+          <!-- Event 3 -->
+          <div class="relative flex gap-4 items-start group">
+            <div
+              class="relative z-10 w-6 h-6 rounded-full bg-background-light dark:bg-background-dark border-2 border-sage dark:border-sage-light flex items-center justify-center shrink-0 mt-0.5 ring-4 ring-background-light dark:ring-background-dark"
+            >
+              <span
+                class="material-symbols-outlined text-sage dark:text-sage-light"
+                style="font-size: 14px"
+                >chat_bubble</span
+              >
+            </div>
+            <div class="flex-1">
+              <div class="flex justify-between items-baseline mb-1">
+                <h3 class="font-bold text-[#1e2b1f] dark:text-white">
+                  Text Check-in
+                </h3>
+                <span
+                  class="text-xs font-medium text-sage/70 dark:text-sage-light/60"
+                  >Sept 14</span
+                >
+              </div>
+              <p
+                class="text-sm text-[#5a655a] dark:text-[#a0a5a0] leading-relaxed"
+              >
+                Sent a meme about gardening.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-40">
+      <button
+        class="w-16 h-16 bg-sage dark:bg-sage text-white rounded-full shadow-lg shadow-sage/40 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group"
+      >
+        <span
+          class="material-symbols-outlined group-hover:rotate-12 transition-transform duration-300"
+          style="font-size: 32px; font-variation-settings: &quot;FILL&quot; 1"
+          >water_drop</span
+        >
+      </button>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Watering Log Interaction</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Karla:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5A7D58", // Sage Green from PRD
+                        "primary-dark": "#435c41",
+                        "accent": "#D97C56", // Terracotta
+                        "highlight": "#E6D6A8", // Soft Pollen
+                        "background-light": "#F9F7F2", // Warm Cream
+                        "background-dark": "#112210",
+                        "surface": "#FFFFFF",
+                        "forest": "#2C362B",
+                        "stone": "#8B968D"
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "body": ["Karla", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem", 
+                        "lg": "1.5rem", 
+                        "xl": "2rem", 
+                        "2xl": "3rem",
+                        "full": "9999px"
+                    },
+                    boxShadow: {
+                        "soft": "0px 4px 20px rgba(90, 125, 88, 0.1)",
+                        "floating": "0px 10px 30px rgba(44, 54, 43, 0.08)"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        /* Custom scrollbar hiding for horizontal scroll */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        /* Smooth selection transition */
+        .interaction-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .interaction-btn.active {
+            background-color: #5A7D58; /* Primary Sage */
+            color: #F9F7F2;
+            transform: translateY(-4px);
+            box-shadow: 0px 8px 16px rgba(90, 125, 88, 0.25);
+        }
+
+        .interaction-btn.inactive {
+            background-color: #FFFFFF;
+            color: #5A7D58;
+            border: 1px solid #EBE7DD;
+        }
+
+        body {
+            font-family: 'Karla', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Newsreader', serif;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-stone-200 h-screen flex justify-center items-end sm:items-center overflow-hidden">
+<!-- Background Simulation (The Garden view behind the modal) -->
+<div class="fixed inset-0 w-full h-full bg-[#F0EFE9] z-0 opacity-50 pointer-events-none" style="background-image: radial-gradient(#d4d1c9 1px, transparent 1px); background-size: 24px 24px;">
+</div>
+<!-- Main Modal Container -->
+<div class="relative w-full max-w-md bg-background-light dark:bg-background-dark rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-floating flex flex-col max-h-[90vh] sm:max-h-[800px] z-10 overflow-hidden">
+<!-- Handlebar area -->
+<div class="w-full flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">
+<div class="h-1.5 w-12 rounded-full bg-stone-300"></div>
+</div>
+<!-- Scrollable Content -->
+<div class="flex-1 overflow-y-auto overflow-x-hidden pb-32">
+<!-- Header Section -->
+<div class="px-8 pt-4 pb-6 text-center">
+<div class="relative inline-block mb-4">
+<img alt="Portrait of Sarah smiling warmly" class="w-20 h-20 rounded-full object-cover border-4 border-white shadow-sm mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlb1k2K3mdvehgfus9R94aXFSud6R8dclGAEvPVQa93kelwCojggjiCafIcWX2n5Uh5eNdl5G4_c0x70jCiTn_K_26l4nRjRt1Gdn_beu8l2E8fWx-Wens9QN-A6bIUFzadKwJHc5sK1TSgdXHqaryLR3QM7Dfi75XA7M-DYT7z2DASd6TiT6msjpjFRuMzDhlEVzkr5Hr2orMDDk8gVvTwlRu7Hu_uwhy9o16zNUYwg_iq-xxiUerMOtvYEqxmMGnp21bjafnQdw3"/>
+<div class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow-sm border-2 border-white flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">water_drop</span>
+</div>
+</div>
+<h1 class="text-forest dark:text-white text-3xl font-semibold tracking-tight">Watering Sarah</h1>
+<p class="text-stone text-sm mt-1 font-body">Last watered 3 weeks ago</p>
+</div>
+<!-- Interaction Type Toggles -->
+<div class="px-6 mb-8">
+<label class="block text-stone text-xs font-bold uppercase tracking-wider mb-4 px-2">Interaction Type</label>
+<div class="flex justify-between items-center gap-2">
+<!-- Option 1: Coffee -->
+<button class="interaction-btn active flex flex-col items-center justify-center w-[72px] h-[72px] rounded-full group">
+<span class="material-symbols-outlined text-3xl mb-1">local_cafe</span>
+<span class="text-[10px] font-bold uppercase tracking-wide opacity-90">Coffee</span>
+</button>
+<!-- Option 2: Call -->
+<button class="interaction-btn inactive flex flex-col items-center justify-center w-[72px] h-[72px] rounded-full group hover:bg-stone-50">
+<span class="material-symbols-outlined text-3xl mb-1">call</span>
+<span class="text-[10px] font-bold uppercase tracking-wide opacity-70">Call</span>
+</button>
+<!-- Option 3: Text -->
+<button class="interaction-btn inactive flex flex-col items-center justify-center w-[72px] h-[72px] rounded-full group hover:bg-stone-50">
+<span class="material-symbols-outlined text-3xl mb-1">sms</span>
+<span class="text-[10px] font-bold uppercase tracking-wide opacity-70">Text</span>
+</button>
+<!-- Option 4: Email -->
+<button class="interaction-btn inactive flex flex-col items-center justify-center w-[72px] h-[72px] rounded-full group hover:bg-stone-50">
+<span class="material-symbols-outlined text-3xl mb-1">mail</span>
+<span class="text-[10px] font-bold uppercase tracking-wide opacity-70">Email</span>
+</button>
+</div>
+</div>
+<!-- Notes Input -->
+<div class="px-6 mb-8">
+<div class="bg-white dark:bg-white/5 rounded-3xl p-6 shadow-soft border border-[#EBE7DD]">
+<div class="flex items-start gap-3 mb-2">
+<span class="material-symbols-outlined text-primary mt-1">edit_note</span>
+<label class="text-forest dark:text-white font-display text-lg font-medium" for="notes">The Soil</label>
+</div>
+<textarea class="w-full bg-transparent border-0 p-0 text-forest dark:text-stone-200 placeholder-stone-400 focus:ring-0 text-base font-body resize-none leading-relaxed" id="notes" placeholder="What did you talk about? Add a memory to help you reconnect next time..." rows="4"></textarea>
+</div>
+</div>
+<!-- Next Reminder / Cadence -->
+<div class="px-6 mb-4">
+<button class="w-full flex items-center justify-between bg-highlight/30 hover:bg-highlight/50 transition-colors p-4 rounded-2xl border border-transparent hover:border-highlight group">
+<div class="flex items-center gap-4">
+<div class="bg-highlight/40 w-10 h-10 rounded-full flex items-center justify-center text-[#8C7A45]">
+<span class="material-symbols-outlined">event_repeat</span>
+</div>
+<div class="text-left">
+<span class="block text-xs font-bold text-stone uppercase tracking-wide">Next Reminder</span>
+<span class="block text-forest dark:text-white font-display text-lg">In 2 weeks (Aug 14)</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-stone group-hover:text-forest transition-colors">edit</span>
+</button>
+</div>
+</div>
+<!-- Floating Bottom Action Bar -->
+<div class="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light via-background-light to-transparent dark:from-background-dark dark:via-background-dark pt-12">
+<button class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-full shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined group-hover:animate-bounce">potted_plant</span>
+<span class="tracking-wide">NURTURE RELATIONSHIP</span>
+</button>
+</div>
+</div>
+</body></html>
