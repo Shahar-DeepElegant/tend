@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Garden - Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5A7D58", // Sage Green from prompt
+                        "accent": "#19c610", // Bright Green from theme config
+                        "background-light": "#F9F7F2", // Warm Cream from prompt
+                        "background-dark": "#112210",
+                        "card-light": "#FFFFFF",
+                        "neutral-sage": "#E8F3E7"
+                    },
+                    fontFamily: {
+                        "display": ["Newsreader", "serif"],
+                        "sans": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .serif-text {
+            font-family: 'Newsreader', serif;
+        }
+        /* Custom Toggle Style */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #5A7D58;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #5A7D58;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-primary min-h-screen pb-24">
+<!-- Header Section -->
+<header class="px-6 pt-12 pb-6">
+<div class="flex items-center justify-between mb-4">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-neutral-sage text-primary">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border border-primary/20">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="Close up of a small succulent plant" src="./images/settings-img-01.jpg"/>
+</div>
+</div>
+<h1 class="serif-text text-5xl font-medium tracking-tight text-primary">Settings</h1>
+<p class="text-primary/70 mt-2 italic">Cultivate your digital sanctuary</p>
+</header>
+<main class="px-4 space-y-6">
+<!-- Garden Structure -->
+<section>
+<h2 class="serif-text text-xl font-semibold px-4 mb-3">Garden Structure</h2>
+<div class="bg-white dark:bg-background-dark/50 rounded-xl p-2 shadow-sm border border-primary/5">
+<a class="flex items-center gap-4 p-4 hover:bg-neutral-sage/30 rounded-lg transition-colors" href="#">
+<div class="w-12 h-12 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">psychology_alt</span>
+</div>
+<div class="flex-1">
+<p class="font-medium text-lg">Define Custom Circles</p>
+<p class="text-sm text-primary/60">Inner, Mid, Outer &amp; custom layers</p>
+</div>
+<span class="material-symbols-outlined text-primary/40">chevron_right</span>
+</a>
+</div>
+</section>
+<!-- Nurturing Controls -->
+<section>
+<h2 class="serif-text text-xl font-semibold px-4 mb-3">Nurturing Controls</h2>
+<div class="bg-white dark:bg-background-dark/50 rounded-xl p-4 shadow-sm border border-primary/5 space-y-6">
+<!-- Reminder Frequency -->
+<div class="flex items-center justify-between gap-4">
+<div class="flex items-center gap-4 flex-1">
+<div class="w-10 h-10 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">water_drop</span>
+</div>
+<div>
+<p class="font-medium">Reminder Frequency</p>
+<p class="text-xs text-primary/60">How often your garden needs care</p>
+</div>
+</div>
+<select class="bg-transparent border-none text-primary font-medium focus:ring-0 cursor-pointer">
+<option>Gentle</option>
+<option selected="">Steady</option>
+<option>Frequent</option>
+</select>
+</div>
+<!-- Fuzzy Reminders Toggle -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">filter_vintage</span>
+</div>
+<div>
+<p class="font-medium">Fuzzy Reminders</p>
+<p class="text-xs text-primary/60">Natural, non-rigid notifications</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-primary/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Quiet Hours -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">dark_mode</span>
+</div>
+<div>
+<p class="font-medium">Quiet Hours / Snooze</p>
+<p class="text-xs text-primary/60">No alerts during resting time</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-primary/40">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Interaction Logging -->
+<section>
+<h2 class="serif-text text-xl font-semibold px-4 mb-3">Interaction Logging</h2>
+<div class="bg-white dark:bg-background-dark/50 rounded-xl p-4 shadow-sm border border-primary/5 space-y-6">
+<!-- Log Mode Toggle -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">edit_note</span>
+</div>
+<div>
+<p class="font-medium">Automatic Log Mode</p>
+<p class="text-xs text-primary/60">Detect calls and messages</p>
+</div>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-primary/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<!-- Notification Detection -->
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-full bg-neutral-sage flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">notifications_active</span>
+</div>
+<div>
+<p class="font-medium">Notification Detection</p>
+<p class="text-xs text-primary/60">Required for automatic logging</p>
+</div>
+</div>
+<span class="text-xs font-bold text-accent px-2 py-1 bg-accent/10 rounded-full uppercase tracking-wider">Enabled</span>
+</div>
+</div>
+</section>
+<!-- Data & Growth -->
+<section>
+<h2 class="serif-text text-xl font-semibold px-4 mb-3">Data &amp; Growth</h2>
+<div class="grid grid-cols-2 gap-4">
+<button class="bg-white dark:bg-background-dark/50 p-6 rounded-xl border border-primary/5 flex flex-col items-center text-center gap-3 transition-transform active:scale-95">
+<div class="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined">cloud_upload</span>
+</div>
+<div>
+<p class="font-semibold text-sm">Backup</p>
+<p class="text-[10px] text-primary/50 uppercase font-bold tracking-widest mt-1">Google Drive</p>
+</div>
+</button>
+<button class="bg-white dark:bg-background-dark/50 p-6 rounded-xl border border-primary/5 flex flex-col items-center text-center gap-3 transition-transform active:scale-95">
+<div class="w-12 h-12 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center">
+<span class="material-symbols-outlined">export_notes</span>
+</div>
+<div>
+<p class="font-semibold text-sm">Export</p>
+<p class="text-[10px] text-primary/50 uppercase font-bold tracking-widest mt-1">CSV Format</p>
+</div>
+</button>
+</div>
+</section>
+<!-- About Section -->
+<section class="pt-4 pb-8 text-center space-y-4">
+<div class="inline-flex items-center gap-2 px-4 py-2 bg-primary/5 rounded-full border border-primary/10">
+<span class="material-symbols-outlined text-sm">info</span>
+<span class="text-xs font-medium opacity-70 tracking-wide uppercase">Version 1.0.4 "Sprout"</span>
+</div>
+<div class="flex justify-center gap-8">
+<a class="text-primary font-medium border-b border-primary/20 pb-1" href="#">Support</a>
+<a class="text-primary font-medium border-b border-primary/20 pb-1" href="#">Privacy</a>
+</div>
+<div class="pt-4 opacity-30 flex justify-center">
+<span class="material-symbols-outlined text-4xl">eco</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 z-50">
+<div class="mx-4 mb-6 px-2 py-3 bg-white/80 backdrop-blur-xl border border-primary/10 rounded-full shadow-lg flex items-center justify-around">
+<a class="flex flex-col items-center gap-1 text-primary/50" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Garden</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/50" href="#">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Journal</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary/50" href="#">
+<span class="material-symbols-outlined text-2xl">monitoring</span>
+<span class="text-[10px] font-bold uppercase tracking-widest">Insights</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<div class="relative">
+<span class="material-symbols-outlined text-2xl font-bold">settings</span>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full"></div>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-widest">Settings</span>
+</a>
+</div>
+</nav>
+</body></html>

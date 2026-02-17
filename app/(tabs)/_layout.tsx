@@ -35,6 +35,15 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color, focused }) => (
+            <MaterialIcons name={focused ? 'person' : 'person-outline'} size={28} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="leaf-profile"
         options={{
           href: null,
