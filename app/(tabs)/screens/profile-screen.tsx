@@ -1,19 +1,38 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Image } from 'expo-image';
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Image } from "expo-image";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useState } from "react";
+import {
+    Pressable,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Switch,
+    View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { GardenText } from '@/components/ui/garden-primitives';
-import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
-import { getConfig, updateConfig, type AppConfig } from '@/lib/db';
-import { rescheduleOnConfigChange } from '@/lib/notifications';
+import { GardenText } from "@/components/ui/garden-primitives";
+import {
+    GardenColors,
+    GardenRadius,
+    GardenSpacing,
+} from "@/constants/design-system";
+import { getConfig, updateConfig, type AppConfig } from "@/lib/db";
+import { rescheduleOnConfigChange } from "@/lib/notifications";
 
-import { profileActions, profileHeader, profileSections, type ProfileRow, type ProfileToggleId } from './profile.data';
-import { CustomCirclesModal } from './profile/custom-circles-modal';
-import { ReminderFrequencyModal } from './profile/reminder-frequency-modal';
+import {
+    profileActions,
+    profileHeader,
+    profileSections,
+    type ProfileRow,
+    type ProfileToggleId,
+} from "./profile.data";
+import { CustomCirclesModal } from "./profile/custom-circles-modal";
+import { ReminderFrequencyModal } from "./profile/reminder-frequency-modal";
 
 export function ProfileScreen() {
+  const insets = useSafeAreaInsets();
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
   const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
@@ -26,12 +45,12 @@ export function ProfileScreen() {
   useFocusEffect(
     useCallback(() => {
       reload();
-    }, [reload])
+    }, [reload]),
   );
 
   const updateToggle = async (toggleId: ProfileToggleId, value: boolean) => {
     if (!config) return;
-    if (toggleId === 'fuzzyReminders') {
+    if (toggleId === "fuzzyReminders") {
       await updateConfig({ fuzzyRemindersEnabled: value });
       setConfig({ ...config, fuzzyRemindersEnabled: value });
       return;
@@ -41,11 +60,11 @@ export function ProfileScreen() {
   };
 
   const handleRowPress = (rowId: string) => {
-    if (rowId === 'custom-circles') {
+    if (rowId === "custom-circles") {
       setCustomCirclesOpen(true);
       return;
     }
-    if (rowId === 'reminder-frequency') {
+    if (rowId === "reminder-frequency") {
       setReminderFrequencyOpen(true);
     }
   };
@@ -57,11 +76,21 @@ export function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top, paddingBottom: 120 + insets.bottom },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <Pressable style={styles.backAction}>
-              <MaterialIcons name="arrow-back" size={22} color={GardenColors.sage} />
+              <MaterialIcons
+                name="arrow-back"
+                size={22}
+                color={GardenColors.sage}
+              />
             </Pressable>
             <View style={styles.avatarWrap}>
               <Image source={profileHeader.avatar} style={styles.avatar} />
@@ -75,26 +104,36 @@ export function ProfileScreen() {
           </GardenText>
         </View>
 
-        {profileSections.map((section) => (
-          <View key={section.id} style={styles.section}>
-            <GardenText variant="section" style={styles.sectionTitle}>
-              {section.title}
-            </GardenText>
-            <View style={styles.card}>
-              {section.rows.map((row, index) => (
-                <View key={row.id}>
-                  <ProfileRowItem
-                    row={row}
-                    toggleValue={row.type === 'toggle' ? toggles[row.toggleId] : false}
-                    onToggle={updateToggle}
-                    onPress={row.type === 'chevron' ? () => handleRowPress(row.id) : undefined}
-                  />
-                  {index < section.rows.length - 1 ? <View style={styles.rowDivider} /> : null}
-                </View>
-              ))}
+        {profileSections
+          .filter((section) => section.id !== "interaction-logging")
+          .map((section) => (
+            <View key={section.id} style={styles.section}>
+              <GardenText variant="section" style={styles.sectionTitle}>
+                {section.title}
+              </GardenText>
+              <View style={styles.card}>
+                {section.rows.map((row, index) => (
+                  <View key={row.id}>
+                    <ProfileRowItem
+                      row={row}
+                      toggleValue={
+                        row.type === "toggle" ? toggles[row.toggleId] : false
+                      }
+                      onToggle={updateToggle}
+                      onPress={
+                        row.type === "chevron"
+                          ? () => handleRowPress(row.id)
+                          : undefined
+                      }
+                    />
+                    {index < section.rows.length - 1 ? (
+                      <View style={styles.rowDivider} />
+                    ) : null}
+                  </View>
+                ))}
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
 
         <View style={styles.section}>
           <GardenText variant="section" style={styles.sectionTitle}>
@@ -106,12 +145,15 @@ export function ProfileScreen() {
                 <View
                   style={[
                     styles.actionIconWrap,
-                    action.tone === 'blue' ? styles.actionIconBlue : styles.actionIconOrange,
-                  ]}>
+                    action.tone === "blue"
+                      ? styles.actionIconBlue
+                      : styles.actionIconOrange,
+                  ]}
+                >
                   <MaterialIcons
                     name={action.icon as keyof typeof MaterialIcons.glyphMap}
                     size={22}
-                    color={action.tone === 'blue' ? '#2B6BE8' : '#D67A2C'}
+                    color={action.tone === "blue" ? "#2B6BE8" : "#D67A2C"}
                   />
                 </View>
                 <GardenText variant="body" style={styles.actionTitle}>
@@ -127,19 +169,31 @@ export function ProfileScreen() {
 
         <View style={styles.aboutSection}>
           <View style={styles.versionBadge}>
-            <MaterialIcons name="info-outline" size={16} color={GardenColors.sage} />
+            <MaterialIcons
+              name="info-outline"
+              size={16}
+              color={GardenColors.sage}
+            />
             <GardenText variant="meta" color="#5F6E5E">
               Version 1.0.4 Sprout
             </GardenText>
           </View>
           <View style={styles.aboutLinks}>
             <Pressable>
-              <GardenText variant="meta" style={styles.aboutLink} color={GardenColors.forest}>
+              <GardenText
+                variant="meta"
+                style={styles.aboutLink}
+                color={GardenColors.forest}
+              >
                 Support
               </GardenText>
             </Pressable>
             <Pressable>
-              <GardenText variant="meta" style={styles.aboutLink} color={GardenColors.forest}>
+              <GardenText
+                variant="meta"
+                style={styles.aboutLink}
+                color={GardenColors.forest}
+              >
                 Privacy
               </GardenText>
             </Pressable>
@@ -168,8 +222,10 @@ export function ProfileScreen() {
         visible={reminderFrequencyOpen}
         onClose={() => setReminderFrequencyOpen(false)}
         initialKeepPersistent={config?.shouldKeepRemindersPersistent ?? true}
-        initialReminderTime={config?.reminderNotificationTime ?? '10:00'}
-        initialContactEventsReminderDays={config?.contactEventsReminderDays ?? 7}
+        initialReminderTime={config?.reminderNotificationTime ?? "10:00"}
+        initialContactEventsReminderDays={
+          config?.contactEventsReminderDays ?? 7
+        }
         onSave={(value) => {
           updateConfig(value)
             .then(async () => {
@@ -177,7 +233,7 @@ export function ProfileScreen() {
               await rescheduleOnConfigChange();
             })
             .catch((error) => {
-              console.error('Failed to update reminder settings', error);
+              console.error("Failed to update reminder settings", error);
             });
         }}
       />
@@ -201,7 +257,8 @@ function ProfileRowItem({
       style={styles.row}
       onPress={onPress}
       disabled={!onPress}
-      accessibilityRole={onPress ? 'button' : undefined}>
+      accessibilityRole={onPress ? "button" : undefined}
+    >
       <View style={styles.rowLeft}>
         <View style={styles.rowIconWrap}>
           <MaterialIcons name={row.icon} size={20} color={GardenColors.sage} />
@@ -215,18 +272,18 @@ function ProfileRowItem({
           </GardenText>
         </View>
       </View>
-      {row.type === 'toggle' ? (
+      {row.type === "toggle" ? (
         <Switch
           value={toggleValue}
           onValueChange={(value) => onToggle(row.toggleId, value)}
-          trackColor={{ false: '#D9E2D6', true: GardenColors.sage }}
+          trackColor={{ false: "#D9E2D6", true: GardenColors.sage }}
           thumbColor={GardenColors.white}
         />
       ) : null}
-      {row.type === 'chevron' ? (
+      {row.type === "chevron" ? (
         <MaterialIcons name="chevron-right" size={24} color="#A2AEA0" />
       ) : null}
-      {row.type === 'status' ? (
+      {row.type === "status" ? (
         <View style={styles.statusPill}>
           <GardenText variant="button" color="#4A9A2D">
             {row.status}
@@ -252,35 +309,35 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   backAction: {
     width: 40,
     height: 40,
     borderRadius: GardenRadius.chip,
-    backgroundColor: '#E8F0E8',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#E8F0E8",
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarWrap: {
     width: 40,
     height: 40,
     borderRadius: GardenRadius.chip,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
-    borderColor: 'rgba(90,125,88,0.2)',
+    borderColor: "rgba(90,125,88,0.2)",
   },
   avatar: {
-    width: '100%',
-    height: '100%',
+    width: "100%",
+    height: "100%",
   },
   title: {
     color: GardenColors.forest,
   },
   subtitle: {
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
   section: {
     gap: GardenSpacing.sm,
@@ -288,37 +345,37 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 27,
     lineHeight: 31,
-    color: '#253325',
+    color: "#253325",
     paddingHorizontal: 4,
   },
   card: {
     backgroundColor: GardenColors.white,
     borderWidth: 1,
-    borderColor: 'rgba(90,125,88,0.08)',
+    borderColor: "rgba(90,125,88,0.08)",
     borderRadius: 22,
     paddingVertical: 6,
   },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     gap: 8,
     paddingHorizontal: 12,
     paddingVertical: 12,
   },
   rowLeft: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   rowIconWrap: {
     width: 40,
     height: 40,
     borderRadius: GardenRadius.chip,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E8F0E8',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E8F0E8",
   },
   rowCopy: {
     flex: 1,
@@ -326,31 +383,31 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: 18,
     lineHeight: 22,
-    color: '#213021',
+    color: "#213021",
   },
   rowDivider: {
     height: 1,
     marginLeft: 64,
-    backgroundColor: 'rgba(90,125,88,0.08)',
+    backgroundColor: "rgba(90,125,88,0.08)",
   },
   statusPill: {
-    backgroundColor: 'rgba(74,154,45,0.12)',
+    backgroundColor: "rgba(74,154,45,0.12)",
     borderRadius: GardenRadius.chip,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   actionGrid: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 10,
   },
   actionButton: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 20,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: 'rgba(90,125,88,0.08)',
+    borderColor: "rgba(90,125,88,0.08)",
     backgroundColor: GardenColors.white,
     gap: 6,
   },
@@ -358,48 +415,48 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: GardenRadius.chip,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   actionIconBlue: {
-    backgroundColor: '#EAF2FF',
+    backgroundColor: "#EAF2FF",
   },
   actionIconOrange: {
-    backgroundColor: '#FFF1E4',
+    backgroundColor: "#FFF1E4",
   },
   actionTitle: {
     fontSize: 17,
     lineHeight: 22,
   },
   actionSubtitle: {
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 0.6,
     fontSize: 11,
-    textAlign: 'center',
+    textAlign: "center",
   },
   aboutSection: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: 14,
     paddingBottom: 24,
   },
   versionBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     borderRadius: GardenRadius.chip,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    backgroundColor: 'rgba(90,125,88,0.08)',
+    backgroundColor: "rgba(90,125,88,0.08)",
     borderWidth: 1,
-    borderColor: 'rgba(90,125,88,0.1)',
+    borderColor: "rgba(90,125,88,0.1)",
   },
   aboutLinks: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 28,
   },
   aboutLink: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(44,54,43,0.18)',
+    borderBottomColor: "rgba(44,54,43,0.18)",
     paddingBottom: 2,
   },
 });
