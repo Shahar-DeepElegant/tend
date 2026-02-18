@@ -9,6 +9,7 @@ import {
     StyleSheet,
     View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import {
     GardenCard,
@@ -36,6 +37,7 @@ type ReminderSection = {
 
 export function UpNextScreen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [contacts, setContacts] = useState<UpNextContactRow[]>([]);
   const [addOpen, setAddOpen] = useState(false);
 
@@ -101,7 +103,13 @@ export function UpNextScreen() {
   return (
     <SafeAreaView style={styles.screen}>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingBottom: insets.bottom,
+            paddingTop: insets.top,
+          },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
@@ -185,7 +193,10 @@ export function UpNextScreen() {
         ))}
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => setAddOpen(true)}>
+      <Pressable
+        style={[styles.fab, { bottom: insets.bottom }]}
+        onPress={() => setAddOpen(true)}
+      >
         <MaterialIcons name="add" size={30} color={GardenColors.white} />
       </Pressable>
 
@@ -272,7 +283,6 @@ const styles = StyleSheet.create({
     backgroundColor: GardenColors.cream,
   },
   content: {
-    paddingBottom: 130,
     paddingHorizontal: GardenSpacing.md,
     paddingTop: GardenSpacing.sm,
     gap: GardenSpacing.lg,
@@ -379,7 +389,6 @@ const styles = StyleSheet.create({
   fab: {
     position: "absolute",
     right: GardenSpacing.md,
-    bottom: 24,
     width: 64,
     height: 64,
     borderRadius: 32,
