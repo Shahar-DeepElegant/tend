@@ -1,25 +1,42 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, View } from 'react-native';
 
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
+import { getConfig, updateConfig, type AppConfig } from '@/lib/db';
 
 import { profileActions, profileHeader, profileSections, type ProfileRow, type ProfileToggleId } from './profile.data';
 import { CustomCirclesModal } from './profile/custom-circles-modal';
 import { ReminderFrequencyModal } from './profile/reminder-frequency-modal';
 
 export function ProfileScreen() {
-  const [toggles, setToggles] = useState<Record<ProfileToggleId, boolean>>({
-    fuzzyReminders: true,
-    automaticLogMode: false,
-  });
+  const [config, setConfig] = useState<AppConfig | null>(null);
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
   const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
 
-  const updateToggle = (toggleId: ProfileToggleId, value: boolean) => {
-    setToggles((current) => ({ ...current, [toggleId]: value }));
+  const reload = useCallback(async () => {
+    const value = await getConfig();
+    setConfig(value);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
+  const updateToggle = async (toggleId: ProfileToggleId, value: boolean) => {
+    if (!config) return;
+    if (toggleId === 'fuzzyReminders') {
+      await updateConfig({ fuzzyRemindersEnabled: value });
+      setConfig({ ...config, fuzzyRemindersEnabled: value });
+      return;
+    }
+    await updateConfig({ automaticLogging: value });
+    setConfig({ ...config, automaticLogging: value });
   };
 
   const handleRowPress = (rowId: string) => {
@@ -30,6 +47,11 @@ export function ProfileScreen() {
     if (rowId === 'reminder-frequency') {
       setReminderFrequencyOpen(true);
     }
+  };
+
+  const toggles: Record<ProfileToggleId, boolean> = {
+    fuzzyReminders: config?.fuzzyRemindersEnabled ?? true,
+    automaticLogMode: config?.automaticLogging ?? false,
   };
 
   return (
@@ -86,7 +108,7 @@ export function ProfileScreen() {
                     action.tone === 'blue' ? styles.actionIconBlue : styles.actionIconOrange,
                   ]}>
                   <MaterialIcons
-                    name={action.icon}
+                    name={action.icon as keyof typeof MaterialIcons.glyphMap}
                     size={22}
                     color={action.tone === 'blue' ? '#2B6BE8' : '#D67A2C'}
                   />
@@ -125,8 +147,32 @@ export function ProfileScreen() {
         </View>
       </ScrollView>
 
-      <CustomCirclesModal visible={customCirclesOpen} onClose={() => setCustomCirclesOpen(false)} />
-      <ReminderFrequencyModal visible={reminderFrequencyOpen} onClose={() => setReminderFrequencyOpen(false)} />
+      <CustomCirclesModal
+        visible={customCirclesOpen}
+        onClose={() => setCustomCirclesOpen(false)}
+        initialCadenceDays={{
+          inner: config?.defaultCadenceInnerDays ?? 14,
+          mid: config?.defaultCadenceMidDays ?? 30,
+          outer: config?.defaultCadenceOuterDays ?? 90,
+        }}
+        onSave={(value) => {
+          updateConfig({
+            defaultCadenceInnerDays: value.inner,
+            defaultCadenceMidDays: value.mid,
+            defaultCadenceOuterDays: value.outer,
+          }).then(reload);
+        }}
+      />
+      <ReminderFrequencyModal
+        visible={reminderFrequencyOpen}
+        onClose={() => setReminderFrequencyOpen(false)}
+        initialKeepPersistent={config?.shouldKeepRemindersPersistent ?? true}
+        initialReminderTime={config?.reminderNotificationTime ?? '10:00'}
+        initialContactEventsReminderDays={config?.contactEventsReminderDays ?? 7}
+        onSave={(value) => {
+          updateConfig(value).then(reload);
+        }}
+      />
     </SafeAreaView>
   );
 }

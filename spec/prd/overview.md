@@ -129,16 +129,17 @@ Fonts chosen to evoke a classic field guide or botanical journal.
 
 **Purpose:** Linear, actionable view of who needs attention now.
 
-**Layout:** Vertical scroll. "Today," "This Week," "Later" section headers.
+**Layout:** Vertical scroll with a compact metric row at the top, then "Needs Water," "Today," and "This Week" section headers.
 
 **Key Elements:**
 
+- **Header Metrics:**
+  - _Thirsty:_ Count of currently overdue contacts.
+  - _Seedlings:_ Count of contacts with no logged interaction yet (`lastSpokeAt = null`) to highlight first-touch opportunities.
 - **Reminder Card:** 80px height, full width minus padding.
   - Left: Avatar (56px).
   - Center: Name (Serif bold), "Last spoke: [Time]" (Sans grey).
   - Right: "Water" Action Button (Icon only: Watering Can).
-- **Snooze Action:** Swipe card left reveals "Snooze" (Clock icon, yellow background).
-- **Skip Action:** Swipe card right reveals "Mark Done" (Check icon, green background).
 
 **States:**
 
@@ -215,7 +216,7 @@ _Note: Physics engine (like `react-spring` or `matter.js`) required for The Gard
 
 1.  **Design System:** Set up Tailwind config with specific colors (`sage`, `terracotta`) and font families (`Young Serif`).
 2.  **Data Model:** Define schema for Contacts (id, name, interval, lastContactDate, circleID).
-3.  **Up Next (Screen 2):** Build the linear list first. It's the core utility. Implement "Mark Done" logic.
+3.  **Up Next (Screen 2):** Build the linear list first. It's the core utility. Prioritize overdue-first sorting and top-level metrics (Thirsty + Seedlings).
 4.  **Leaf (Screen 3):** Detail view + Edit capabilities.
 5.  **Watering (Screen 4):** The mutation flow (updating `lastContactDate`).
 6.  **The Garden (Screen 1):** The complex UI layer. Connect physics/canvas to the data model established in step 2.

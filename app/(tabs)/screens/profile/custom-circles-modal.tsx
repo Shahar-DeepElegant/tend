@@ -1,5 +1,5 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 
 import { GardenCard, GardenText } from '@/components/ui/garden-primitives';
@@ -8,24 +8,18 @@ import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-sy
 type CircleKey = 'inner' | 'mid' | 'outer';
 
 type CadenceOption = {
-  id: string;
+  days: number;
   label: string;
   subtitle: string;
 };
 
 const cadenceOptions: CadenceOption[] = [
-  { id: 'weekly', label: 'Weekly', subtitle: 'For frequent touchpoints' },
-  { id: 'biweekly', label: 'Every 2 weeks', subtitle: 'Balanced and consistent' },
-  { id: 'monthly', label: 'Monthly', subtitle: 'A steady monthly check-in' },
-  { id: 'quarterly', label: 'Quarterly', subtitle: 'Every 3 months' },
-  { id: 'semiannual', label: 'Every 6 months', subtitle: 'Low-maintenance rhythm' },
+  { days: 7, label: 'Weekly', subtitle: 'For frequent touchpoints' },
+  { days: 14, label: 'Every 2 weeks', subtitle: 'Balanced and consistent' },
+  { days: 30, label: 'Monthly', subtitle: 'A steady monthly check-in' },
+  { days: 90, label: 'Quarterly', subtitle: 'Every 3 months' },
+  { days: 180, label: 'Every 6 months', subtitle: 'Low-maintenance rhythm' },
 ];
-
-const defaultCadenceByCircle: Record<CircleKey, string> = {
-  inner: 'biweekly',
-  mid: 'monthly',
-  outer: 'quarterly',
-};
 
 const circleConfig: { key: CircleKey; title: string; icon: keyof typeof MaterialIcons.glyphMap; note: string }[] = [
   { key: 'inner', title: 'Inner Circle', icon: 'favorite', note: 'Closest relationships you nurture most often.' },
@@ -36,10 +30,18 @@ const circleConfig: { key: CircleKey; title: string; icon: keyof typeof Material
 type CustomCirclesModalProps = {
   visible: boolean;
   onClose: () => void;
+  initialCadenceDays: Record<CircleKey, number>;
+  onSave: (value: Record<CircleKey, number>) => void;
 };
 
-export function CustomCirclesModal({ visible, onClose }: CustomCirclesModalProps) {
-  const [cadenceByCircle, setCadenceByCircle] = useState<Record<CircleKey, string>>(defaultCadenceByCircle);
+export function CustomCirclesModal({ visible, onClose, initialCadenceDays, onSave }: CustomCirclesModalProps) {
+  const [cadenceByCircle, setCadenceByCircle] = useState<Record<CircleKey, number>>(initialCadenceDays);
+
+  useEffect(() => {
+    if (visible) {
+      setCadenceByCircle(initialCadenceDays);
+    }
+  }, [initialCadenceDays, visible]);
 
   return (
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -74,11 +76,11 @@ export function CustomCirclesModal({ visible, onClose }: CustomCirclesModalProps
 
                 <View style={styles.chipsRow}>
                   {cadenceOptions.map((option) => {
-                    const selected = cadenceByCircle[circle.key] === option.id;
+                    const selected = cadenceByCircle[circle.key] === option.days;
                     return (
                       <Pressable
-                        key={option.id}
-                        onPress={() => setCadenceByCircle((current) => ({ ...current, [circle.key]: option.id }))}
+                        key={option.days}
+                        onPress={() => setCadenceByCircle((current) => ({ ...current, [circle.key]: option.days }))}
                         style={[styles.chip, selected ? styles.chipSelected : null]}>
                         <GardenText variant="meta" color={selected ? GardenColors.white : GardenColors.forest}>
                           {option.label}
@@ -91,14 +93,19 @@ export function CustomCirclesModal({ visible, onClose }: CustomCirclesModalProps
                 <View style={styles.activeHint}>
                   <MaterialIcons name="schedule" size={14} color="#6A7868" />
                   <GardenText variant="meta" color="#6A7868">
-                    {cadenceOptions.find((option) => option.id === cadenceByCircle[circle.key])?.subtitle}
+                    {cadenceOptions.find((option) => option.days === cadenceByCircle[circle.key])?.subtitle}
                   </GardenText>
                 </View>
               </GardenCard>
             ))}
           </ScrollView>
 
-          <Pressable style={styles.cta} onPress={onClose}>
+          <Pressable
+            style={styles.cta}
+            onPress={() => {
+              onSave(cadenceByCircle);
+              onClose();
+            }}>
             <GardenText variant="button" color={GardenColors.white}>
               Save Circle Defaults
             </GardenText>

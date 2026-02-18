@@ -1,21 +1,59 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
+import { getFirstContactId, getLeafProfileData } from '@/lib/db';
+import type { ContactLogRecord, LeafProfileData } from '@/lib/db/types';
 
-import { growthRings, leafProfile, type GrowthRingType } from './leaf-profile.data';
+type GrowthRingType = 'coffee' | 'call' | 'text' | 'email';
 
 const ringIconByType: Record<GrowthRingType, keyof typeof MaterialIcons.glyphMap> = {
   coffee: 'local-cafe',
   call: 'call',
   text: 'chat-bubble',
+  email: 'mail',
 };
 
 export function LeafProfileScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ contactId?: string }>();
+  const [profile, setProfile] = useState<LeafProfileData | null>(null);
+
+  const reload = useCallback(async () => {
+    const targetId = typeof params.contactId === 'string' ? params.contactId : await getFirstContactId();
+    if (!targetId) {
+      setProfile(null);
+      return;
+    }
+    const data = await getLeafProfileData(targetId);
+    setProfile(data);
+  }, [params.contactId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
+  if (!profile) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <View style={styles.emptyState}>
+          <GardenText variant="section">No contact selected</GardenText>
+          <GardenText variant="meta">Add a contact from Up Next to view profile details.</GardenText>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const growthRings = profile.logs.map(toGrowthRing);
+  const lastSpokeText = profile.lastSpokeAt ? formatShortDate(profile.lastSpokeAt) : 'Never';
+  const cadenceText = `Every ${profile.effectiveCadenceDays} day${profile.effectiveCadenceDays === 1 ? '' : 's'}`;
+  const nextReminderText = profile.dueAt ? formatShortDate(profile.dueAt) : 'Any time';
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -32,18 +70,24 @@ export function LeafProfileScreen() {
         <View style={styles.profileSection}>
           <View style={styles.avatarGlow} />
           <View style={styles.avatarRing}>
-            <Image source={leafProfile.avatarUrl} style={styles.avatar} />
+            {profile.contact.imageUri ? (
+              <Image source={profile.contact.imageUri} style={styles.avatarImage} />
+            ) : (
+              <View style={styles.avatarFallback}>
+                <GardenText variant="section">{initialsFromName(profile.contact.nickName || profile.contact.fullName)}</GardenText>
+              </View>
+            )}
           </View>
           <View style={styles.statusBadge}>
             <MaterialIcons name="eco" size={18} color="#7A9D78" />
           </View>
 
           <GardenText variant="title" style={styles.name}>
-            {leafProfile.name}
+            {profile.contact.fullName}
           </GardenText>
           <View style={styles.relationPill}>
             <GardenText variant="button" color="#3A5D38">
-              {leafProfile.relation}
+              {profile.contact.circleId.toUpperCase()} CIRCLE
             </GardenText>
           </View>
         </View>
@@ -61,7 +105,9 @@ export function LeafProfileScreen() {
               Message
             </GardenText>
           </Pressable>
-          <Pressable style={styles.quickActionPrimary} onPress={() => router.push('/watering')}>
+          <Pressable
+            style={styles.quickActionPrimary}
+            onPress={() => router.push({ pathname: '/watering', params: { contactId: profile.contact.systemId } })}>
             <MaterialIcons name="water-drop" size={20} color={GardenColors.white} />
             <GardenText variant="meta" color={GardenColors.white}>
               Log Water
@@ -75,7 +121,7 @@ export function LeafProfileScreen() {
               LAST SPOKE
             </GardenText>
             <GardenText variant="section" style={styles.statValue}>
-              {leafProfile.lastSpoke}
+              {lastSpokeText}
             </GardenText>
           </View>
           <View style={styles.statCard}>
@@ -83,7 +129,7 @@ export function LeafProfileScreen() {
               STREAK
             </GardenText>
             <GardenText variant="section" style={styles.statValue}>
-              {leafProfile.streak}
+              {profile.streakCount}
             </GardenText>
           </View>
         </View>
@@ -95,16 +141,13 @@ export function LeafProfileScreen() {
             </View>
             <View>
               <GardenText variant="section" style={styles.scheduleTitle}>
-                {leafProfile.cadence}
+                {cadenceText}
               </GardenText>
               <GardenText variant="meta" color="#5A7D58">
-                Next: {leafProfile.nextReminder}
+                Next: {nextReminderText}
               </GardenText>
             </View>
           </View>
-          <Pressable style={styles.expandButton}>
-            <MaterialIcons name="expand-more" size={20} color="#6D7B6C" />
-          </Pressable>
         </View>
 
         <View style={styles.section}>
@@ -115,11 +158,8 @@ export function LeafProfileScreen() {
             </GardenText>
           </View>
           <View style={styles.noteCard}>
-            <Pressable style={styles.noteEdit}>
-              <MaterialIcons name="edit" size={14} color="#3A5D38" />
-            </Pressable>
             <GardenText variant="body" style={styles.noteText} color="#4A554A">
-              {leafProfile.soilNote}
+              {profile.contact.description || 'No notes yet. Add memories during watering logs.'}
             </GardenText>
           </View>
         </View>
@@ -161,17 +201,56 @@ export function LeafProfileScreen() {
         </View>
       </ScrollView>
 
-      <Pressable style={styles.fab} onPress={() => router.push('/watering')}>
+      <Pressable
+        style={styles.fab}
+        onPress={() => router.push({ pathname: '/watering', params: { contactId: profile.contact.systemId } })}>
         <MaterialIcons name="water-drop" size={32} color={GardenColors.white} />
       </Pressable>
     </SafeAreaView>
   );
 }
 
+function toGrowthRing(log: ContactLogRecord, index: number) {
+  const lower = log.summary.toLowerCase();
+  const type: GrowthRingType = lower.includes('call')
+    ? 'call'
+    : lower.includes('email')
+      ? 'email'
+      : lower.includes('coffee')
+        ? 'coffee'
+        : 'text';
+  return {
+    id: String(log.id),
+    type,
+    title: type.charAt(0).toUpperCase() + type.slice(1),
+    date: formatShortDate(log.createdAt),
+    note: log.summary,
+    highlighted: index === 0,
+  };
+}
+
+function formatShortDate(iso: string) {
+  return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' });
+}
+
+function initialsFromName(name: string) {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0].slice(0, 1)}${parts[parts.length - 1].slice(0, 1)}`.toUpperCase();
+}
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: GardenColors.cream,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    padding: 24,
   },
   topBar: {
     flexDirection: 'row',
@@ -215,7 +294,14 @@ const styles = StyleSheet.create({
     borderColor: GardenColors.white,
     overflow: 'hidden',
   },
-  avatar: {
+  avatarFallback: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#E8F0E8',
+  },
+  avatarImage: {
     width: '100%',
     height: '100%',
   },
@@ -280,8 +366,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statValue: {
-    fontSize: 28,
-    lineHeight: 32,
+    fontSize: 24,
+    lineHeight: 28,
     color: '#1E2B1F',
   },
   scheduleCard: {
@@ -310,16 +396,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scheduleTitle: {
-    fontSize: 30,
-    lineHeight: 34,
+    fontSize: 24,
+    lineHeight: 28,
     color: '#1E2B1F',
-  },
-  expandButton: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
   },
   section: {
     gap: 12,
@@ -343,17 +422,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(90,125,88,0.05)',
     padding: GardenSpacing.md,
     paddingTop: 22,
-  },
-  noteEdit: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-    width: 30,
-    height: 30,
-    borderRadius: GardenRadius.chip,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.75)',
   },
   noteText: {
     fontStyle: 'italic',
@@ -423,4 +491,3 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 });
-

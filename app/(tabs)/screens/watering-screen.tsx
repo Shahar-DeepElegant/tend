@@ -1,16 +1,61 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Pressable, SafeAreaView, StyleSheet, TextInput, View } from 'react-native';
 
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
+import { getFirstContactId, getLeafProfileData, insertContactLog } from '@/lib/db/repository';
 
-import { interactionOptions, type WateringInteraction, wateringProfile } from './watering.data';
+import { interactionOptions, type WateringInteraction } from './watering.data';
 
 export function WateringScreen() {
+  const router = useRouter();
+  const params = useLocalSearchParams<{ contactId?: string }>();
   const [interaction, setInteraction] = useState<WateringInteraction>('coffee');
   const [notes, setNotes] = useState('');
+  const [contact, setContact] = useState<{ id: string; name: string; lastSpoke: string; imageUri: string | null }>({
+    id: '',
+    name: 'Friend',
+    lastSpoke: 'Never',
+    imageUri: null,
+  });
+  const [saving, setSaving] = useState(false);
+
+  const reload = useCallback(async () => {
+    const targetId = typeof params.contactId === 'string' ? params.contactId : await getFirstContactId();
+    if (!targetId) {
+      setContact({ id: '', name: 'Friend', lastSpoke: 'Never', imageUri: null });
+      return;
+    }
+    const profile = await getLeafProfileData(targetId);
+    if (!profile) return;
+    setContact({
+      id: targetId,
+      name: profile.contact.fullName,
+      lastSpoke: profile.lastSpokeAt ? formatRelative(profile.lastSpokeAt) : 'Never',
+      imageUri: profile.contact.imageUri,
+    });
+  }, [params.contactId]);
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
+  const handleSubmit = async () => {
+    if (!contact.id || saving) return;
+    setSaving(true);
+    try {
+      const summary = `${interaction}: ${notes.trim() || 'No summary provided.'}`;
+      await insertContactLog({ contactSystemId: contact.id, summary });
+      router.back();
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.screen}>
@@ -19,15 +64,21 @@ export function WateringScreen() {
 
         <View style={styles.header}>
           <View style={styles.avatarWrap}>
-            <Image source={wateringProfile.avatarUrl} style={styles.avatar} />
+            {contact.imageUri ? (
+              <Image source={contact.imageUri} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatar}>
+                <GardenText variant="section">{initialsFromName(contact.name)}</GardenText>
+              </View>
+            )}
             <View style={styles.avatarBadge}>
               <MaterialIcons name="water-drop" size={15} color={GardenColors.white} />
             </View>
           </View>
           <GardenText variant="title" style={styles.title}>
-            Watering {wateringProfile.name}
+            Watering {contact.name}
           </GardenText>
-          <GardenText variant="meta">Last watered {wateringProfile.lastWatered}</GardenText>
+          <GardenText variant="meta">Last watered {contact.lastSpoke}</GardenText>
         </View>
 
         <View style={styles.section}>
@@ -77,15 +128,30 @@ export function WateringScreen() {
           </View>
         </View>
 
-        <Pressable style={styles.submitButton}>
-          <MaterialIcons name="potted-plant" size={20} color={GardenColors.white} />
+        <Pressable style={[styles.submitButton, saving ? styles.submitButtonDisabled : null]} onPress={handleSubmit} disabled={saving || !contact.id}>
+          <MaterialIcons name="local-florist" size={20} color={GardenColors.white} />
           <GardenText variant="button" color={GardenColors.white}>
-            Nurture Relationship
+            {saving ? 'Saving...' : 'Nurture Relationship'}
           </GardenText>
         </Pressable>
       </View>
     </SafeAreaView>
   );
+}
+
+function formatRelative(iso: string) {
+  const diffDays = Math.floor((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60 * 24));
+  if (diffDays < 1) return 'today';
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? '' : 's'} ago`;
+  const weeks = Math.floor(diffDays / 7);
+  return `${weeks} week${weeks === 1 ? '' : 's'} ago`;
+}
+
+function initialsFromName(name: string) {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0].slice(0, 1)}${parts[parts.length - 1].slice(0, 1)}`.toUpperCase();
 }
 
 const styles = StyleSheet.create({
@@ -123,6 +189,9 @@ const styles = StyleSheet.create({
     borderRadius: GardenRadius.chip,
     borderWidth: 3,
     borderColor: GardenColors.white,
+    backgroundColor: '#E8F0E8',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   avatarBadge: {
     position: 'absolute',
@@ -185,7 +254,6 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 88,
-    fontFamily: 'Karla_500Medium',
     color: GardenColors.forest,
     fontSize: 16,
     lineHeight: 22,
@@ -199,5 +267,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexDirection: 'row',
     gap: 8,
+  },
+  submitButtonDisabled: {
+    opacity: 0.55,
   },
 });

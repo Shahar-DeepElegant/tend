@@ -5,8 +5,9 @@ import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, TextInput, View
 
 import { GardenCard, GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenFonts, GardenRadius, GardenSpacing } from '@/constants/design-system';
-
-import { seedContacts } from '../up-next.data';
+import { canImportContactsOnCurrentPlatform, listImportContacts, type ImportContact } from '@/lib/contacts/provider';
+import { upsertContact } from '@/lib/db';
+import type { CircleId } from '@/lib/db';
 
 type Step = 1 | 2;
 type Circle = 'Inner Circle' | 'Mid Circle' | 'Outer Circle';
@@ -17,16 +18,27 @@ const cadenceByCircle: Record<Circle, string> = {
   'Outer Circle': 'Every 3-6 months',
 };
 
+const circleByLabel: Record<Circle, CircleId> = {
+  'Inner Circle': 'inner',
+  'Mid Circle': 'mid',
+  'Outer Circle': 'outer',
+};
+
 type AddContactModalProps = {
   visible: boolean;
   onClose: () => void;
+  onAdded?: () => void;
 };
 
-export function AddContactModal({ visible, onClose }: AddContactModalProps) {
+export function AddContactModal({ visible, onClose, onAdded }: AddContactModalProps) {
   const [step, setStep] = useState<Step>(1);
   const [query, setQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [circleById, setCircleById] = useState<Record<string, Circle>>({});
+  const [sourceContacts, setSourceContacts] = useState<ImportContact[]>([]);
+  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const canImport = canImportContactsOnCurrentPlatform();
 
   useEffect(() => {
     if (!visible) {
@@ -34,16 +46,46 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
       setQuery('');
       setSelectedIds([]);
       setCircleById({});
+      return;
     }
+
+    let cancelled = false;
+    setLoadingContacts(true);
+    listImportContacts('')
+      .then((contacts) => {
+        if (cancelled) return;
+        setSourceContacts(contacts);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoadingContacts(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [visible]);
 
-  const filteredContacts = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return seedContacts;
-    return seedContacts.filter((c) => c.name.toLowerCase().includes(q));
-  }, [query]);
+  useEffect(() => {
+    if (!visible) return;
+    let cancelled = false;
+    setLoadingContacts(true);
+    listImportContacts(query)
+      .then((contacts) => {
+        if (!cancelled) setSourceContacts(contacts);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingContacts(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [query, visible]);
 
-  const selectedContacts = seedContacts.filter((c) => selectedIds.includes(c.id));
+  const selectedContacts = useMemo(
+    () => sourceContacts.filter((contact) => selectedIds.includes(contact.systemId)),
+    [sourceContacts, selectedIds]
+  );
 
   const toggleSelected = (id: string) => {
     const alreadySelected = selectedIds.includes(id);
@@ -59,6 +101,29 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
 
     setSelectedIds((current) => [...current, id]);
     setCircleById((existing) => ({ ...existing, [id]: existing[id] ?? 'Mid Circle' }));
+  };
+
+  const handleAddSeeds = async () => {
+    if (selectedContacts.length === 0) return;
+    setSaving(true);
+    try {
+      for (const contact of selectedContacts) {
+        const selectedCircle = circleById[contact.systemId] ?? 'Mid Circle';
+        await upsertContact({
+          systemId: contact.systemId,
+          fullName: contact.fullName,
+          nickName: contact.nickName,
+          imageUri: contact.imageUri,
+          description: null,
+          circleId: circleByLabel[selectedCircle],
+          customReminderDays: null,
+        });
+      }
+      onAdded?.();
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -79,7 +144,16 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
             </GardenText>
           </View>
 
-          {step === 1 ? (
+          {!canImport ? (
+            <View style={styles.stepBody}>
+              <GardenText variant="section">Import not available on web</GardenText>
+              <GardenText variant="meta">
+                Set `EXPO_PUBLIC_MOCK_CONTACTS_ON_WEB=true` to mock contact source while still using SQLite.
+              </GardenText>
+            </View>
+          ) : null}
+
+          {canImport && step === 1 ? (
             <View style={styles.stepBody}>
               <GardenText variant="section">Who would you like to plant?</GardenText>
               <GardenText variant="meta">Select friends to add to your garden.</GardenText>
@@ -94,28 +168,36 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
                 />
               </View>
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contactsList}>
-                {filteredContacts.map((contact) => {
-                  const selected = selectedIds.includes(contact.id);
+                {loadingContacts ? (
+                  <GardenText variant="meta" color={GardenColors.stone}>
+                    Loading contacts...
+                  </GardenText>
+                ) : null}
+                {!loadingContacts && sourceContacts.length === 0 ? (
+                  <GardenText variant="meta" color={GardenColors.stone}>
+                    No contacts found.
+                  </GardenText>
+                ) : null}
+                {sourceContacts.map((contact) => {
+                  const selected = selectedIds.includes(contact.systemId);
                   return (
                     <Pressable
-                      key={contact.id}
+                      key={contact.systemId}
                       style={[styles.contactRow, selected ? styles.contactRowSelected : null]}
-                      onPress={() => toggleSelected(contact.id)}>
+                      onPress={() => toggleSelected(contact.systemId)}>
                       <View style={styles.contactLeft}>
-                        {contact.image ? (
-                          <Image source={contact.image} style={styles.contactAvatar} />
+                        {contact.imageUri ? (
+                          <Image source={contact.imageUri} style={styles.contactAvatar} />
                         ) : (
                           <View style={styles.contactInitials}>
                             <GardenText variant="button" color={GardenColors.sage}>
-                              {contact.initials}
+                              {initialsFromName(contact.fullName)}
                             </GardenText>
                           </View>
                         )}
                         <View>
-                          <GardenText variant="body">{contact.name}</GardenText>
-                          <GardenText variant="meta">
-                            {contact.label} - {contact.phone}
-                          </GardenText>
+                          <GardenText variant="body">{contact.fullName}</GardenText>
+                          <GardenText variant="meta">{contact.nickName || 'Contact'}</GardenText>
                         </View>
                       </View>
                       <View style={[styles.checkbox, selected ? styles.checkboxSelected : null]}>
@@ -136,22 +218,22 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
             </View>
           ) : null}
 
-          {step === 2 ? (
+          {canImport && step === 2 ? (
             <View style={styles.stepBody}>
               <GardenText variant="section">Where should these seeds grow?</GardenText>
               <GardenText variant="meta">Assign each friend to a circle and set reminder cadence.</GardenText>
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.seedPacketList}>
                 {selectedContacts.map((contact) => {
-                  const activeCircle = circleById[contact.id] ?? 'Mid Circle';
+                  const activeCircle = circleById[contact.systemId] ?? 'Mid Circle';
                   return (
-                    <GardenCard key={contact.id} style={styles.seedPacket}>
+                    <GardenCard key={contact.systemId} style={styles.seedPacket}>
                       <View style={styles.contactLeft}>
-                        {contact.image ? (
-                          <Image source={contact.image} style={styles.contactAvatar} />
+                        {contact.imageUri ? (
+                          <Image source={contact.imageUri} style={styles.contactAvatar} />
                         ) : (
                           <View style={styles.contactInitials}>
                             <GardenText variant="button" color={GardenColors.sage}>
-                              {contact.initials}
+                              {initialsFromName(contact.fullName)}
                             </GardenText>
                           </View>
                         )}
@@ -159,7 +241,7 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
                           <GardenText variant="meta" color={GardenColors.sage}>
                             Seed Packet
                           </GardenText>
-                          <GardenText variant="body">{contact.name}</GardenText>
+                          <GardenText variant="body">{contact.fullName}</GardenText>
                         </View>
                       </View>
                       <ScrollView
@@ -169,7 +251,7 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
                         {(['Inner Circle', 'Mid Circle', 'Outer Circle'] as Circle[]).map((circle) => (
                           <Pressable
                             key={circle}
-                            onPress={() => setCircleById((current) => ({ ...current, [contact.id]: circle }))}
+                            onPress={() => setCircleById((current) => ({ ...current, [contact.systemId]: circle }))}
                             style={[styles.circleChip, activeCircle === circle ? styles.circleChipActive : null]}>
                             <GardenText
                               variant="meta"
@@ -187,9 +269,9 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
                   );
                 })}
               </ScrollView>
-              <Pressable onPress={onClose} style={styles.cta}>
+              <Pressable onPress={handleAddSeeds} style={[styles.cta, saving ? styles.ctaDisabled : null]} disabled={saving}>
                 <GardenText variant="button" color={GardenColors.white}>
-                  Add Seeds to Garden
+                  {saving ? 'Adding...' : 'Add Seeds to Garden'}
                 </GardenText>
               </Pressable>
             </View>
@@ -198,6 +280,13 @@ export function AddContactModal({ visible, onClose }: AddContactModalProps) {
       </SafeAreaView>
     </Modal>
   );
+}
+
+function initialsFromName(name: string) {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0].slice(0, 1)}${parts[parts.length - 1].slice(0, 1)}`.toUpperCase();
 }
 
 const styles = StyleSheet.create({
@@ -292,11 +381,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: GardenSpacing.sm,
   },
-  contactAvatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-  },
   contactInitials: {
     width: 48,
     height: 48,
@@ -304,6 +388,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#E9F1E8',
+  },
+  contactAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
   },
   checkbox: {
     width: 24,

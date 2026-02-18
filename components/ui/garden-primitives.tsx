@@ -1,5 +1,15 @@
 import { PropsWithChildren } from 'react';
-import { Pressable, PressableProps, StyleProp, StyleSheet, Text, TextProps, View, ViewStyle } from 'react-native';
+import {
+  Pressable,
+  PressableProps,
+  PressableStateCallbackType,
+  StyleProp,
+  StyleSheet,
+  Text,
+  TextProps,
+  View,
+  ViewStyle,
+} from 'react-native';
 
 import {
   GardenColors,
@@ -34,8 +44,17 @@ type PillButtonProps = PressableProps & {
 };
 
 export function PillButton({ tone = 'primary', style, children, ...props }: PillButtonProps) {
+  const resolvedStyle =
+    typeof style === 'function'
+      ? (state: PressableStateCallbackType) => [
+          styles.pillButton,
+          tone === 'primary' ? styles.primaryButton : styles.ghostButton,
+          style(state),
+        ]
+      : [styles.pillButton, tone === 'primary' ? styles.primaryButton : styles.ghostButton, style];
+
   return (
-    <Pressable style={[styles.pillButton, tone === 'primary' ? styles.primaryButton : styles.ghostButton, style]} {...props}>
+    <Pressable style={resolvedStyle} {...props}>
       {children}
     </Pressable>
   );

@@ -1,16 +1,21 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
-import { useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { PanResponder, Pressable, SafeAreaView, StyleProp, StyleSheet, TextInput, View, ViewStyle } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
+import { getGardenContacts, type CircleId, type GardenContactRow } from '@/lib/db';
 
-import { groveContacts, type GroveContact } from './garden.data';
 import { AddContactModal } from './up-next/add-contact-modal';
+
+type OrbitContact = GardenContactRow & {
+  left: number;
+  top: number;
+};
 
 export function GardenScreen() {
   const router = useRouter();
@@ -19,6 +24,7 @@ export function GardenScreen() {
   const ZOOM_STEP = 0.2;
   const [zoom, setZoom] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
+  const [contacts, setContacts] = useState<GardenContactRow[]>([]);
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
   const reportedScale = useSharedValue(1);
@@ -26,13 +32,24 @@ export function GardenScreen() {
   const translateY = useSharedValue(0);
   const dragStart = useRef({ x: 0, y: 0 });
 
+  const reload = useCallback(async () => {
+    const rows = await getGardenContacts();
+    setContacts(rows);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      reload();
+    }, [reload])
+  );
+
   const contactsByRing = useMemo(
     () => ({
-      inner: groveContacts.filter((contact) => contact.ring === 'inner'),
-      mid: groveContacts.filter((contact) => contact.ring === 'mid'),
-      outer: groveContacts.filter((contact) => contact.ring === 'outer'),
+      inner: withPositions(contacts.filter((contact) => contact.circleId === 'inner'), 'inner'),
+      mid: withPositions(contacts.filter((contact) => contact.circleId === 'mid'), 'mid'),
+      outer: withPositions(contacts.filter((contact) => contact.circleId === 'outer'), 'outer'),
     }),
-    []
+    [contacts]
   );
 
   const setAbsoluteZoom = (target: number) => {
@@ -113,11 +130,7 @@ export function GardenScreen() {
         </View>
         <View style={styles.searchWrap}>
           <MaterialIcons name="search" size={20} color={GardenColors.stone} />
-          <TextInput
-            placeholder="Find someone in your rings..."
-            placeholderTextColor={GardenColors.stone}
-            style={styles.searchInput}
-          />
+          <TextInput placeholder="Find someone in your rings..." placeholderTextColor={GardenColors.stone} style={styles.searchInput} />
         </View>
       </View>
 
@@ -171,14 +184,14 @@ export function GardenScreen() {
         <MaterialIcons name="add" size={30} color={GardenColors.white} />
       </Pressable>
 
-      <AddContactModal visible={addOpen} onClose={() => setAddOpen(false)} />
+      <AddContactModal visible={addOpen} onClose={() => setAddOpen(false)} onAdded={reload} />
     </SafeAreaView>
   );
 }
 
 function renderContacts(
-  contacts: GroveContact[],
-  ring: 'inner' | 'mid' | 'outer',
+  contacts: OrbitContact[],
+  ring: CircleId,
   router: ReturnType<typeof useRouter>,
   zoom: number
 ) {
@@ -192,8 +205,8 @@ function renderContacts(
     <>
       {visibleContacts.map((contact) => (
         <Pressable
-          key={contact.id}
-          onPress={() => (contact.needsWater ? router.push('/watering') : router.push('/leaf-profile'))}
+          key={contact.systemId}
+          onPress={() => router.push({ pathname: '/leaf-profile', params: { contactId: contact.systemId } })}
           style={[
             styles.contactAvatar,
             {
@@ -205,12 +218,20 @@ function renderContacts(
               marginTop: -size / 2,
               borderRadius: size / 2,
               borderWidth,
-              borderColor: contact.needsWater ? GardenColors.sage : '#C6D9C5',
+              borderColor: contact.isOverdue ? GardenColors.sage : '#C6D9C5',
               opacity: ring === 'outer' ? 0.85 : 1,
             },
           ]}>
-          <Image source={contact.image} style={styles.contactImage} />
-          {contact.needsWater ? <View style={styles.waterBadge} /> : null}
+          {contact.imageUri ? (
+            <Image source={contact.imageUri} style={styles.contactImage} />
+          ) : (
+            <View style={styles.contactInitials}>
+              <GardenText variant="meta" color={GardenColors.sage}>
+                {initialsFromName(contact.nickName || contact.fullName)}
+              </GardenText>
+            </View>
+          )}
+          {contact.isOverdue ? <View style={styles.waterBadge} /> : null}
         </Pressable>
       ))}
       {hiddenCount > 0 ? <OverflowAvatar ring={ring} hiddenCount={hiddenCount} /> : null}
@@ -218,10 +239,14 @@ function renderContacts(
   );
 }
 
-function OverflowAvatar({ ring, hiddenCount }: { ring: 'inner' | 'mid' | 'outer'; hiddenCount: number }) {
+function OverflowAvatar({ ring, hiddenCount }: { ring: CircleId; hiddenCount: number }) {
   const size = ring === 'inner' ? 42 : ring === 'mid' ? 36 : 30;
-  const position =
-    ring === 'inner' ? { left: '82%', top: '16%' } : ring === 'mid' ? { left: '83%', top: '82%' } : { left: '14%', top: '14%' };
+  const position: StyleProp<ViewStyle> =
+    ring === 'inner'
+      ? ({ left: '82%' as const, top: '16%' as const } satisfies ViewStyle)
+      : ring === 'mid'
+        ? ({ left: '83%' as const, top: '82%' as const } satisfies ViewStyle)
+        : ({ left: '14%' as const, top: '14%' as const } satisfies ViewStyle);
 
   return (
     <View
@@ -243,7 +268,7 @@ function OverflowAvatar({ ring, hiddenCount }: { ring: 'inner' | 'mid' | 'outer'
   );
 }
 
-function getVisibleLimit(ring: 'inner' | 'mid' | 'outer', zoom: number) {
+function getVisibleLimit(ring: CircleId, zoom: number) {
   const base = ring === 'inner' ? 3 : ring === 'mid' ? 4 : 4;
   const boost = Math.max(0, Math.floor((zoom - 1) * 8));
   return base + boost;
@@ -257,6 +282,36 @@ function Ring({ style, label }: { style: StyleProp<ViewStyle>; label: string }) 
       </GardenText>
     </View>
   );
+}
+
+function withPositions(contacts: GardenContactRow[], ring: CircleId): OrbitContact[] {
+  return contacts.map((contact, index) => {
+    const hash = hashString(contact.systemId);
+    const angle = (hash % 360) + index * 17;
+    const ringRadius = ring === 'inner' ? 20 : ring === 'mid' ? 34 : 45;
+    const variance = ((hash % 17) - 8) * 0.4;
+    const radius = ringRadius + variance;
+    const radians = (angle * Math.PI) / 180;
+    const left = 50 + Math.cos(radians) * radius;
+    const top = 50 + Math.sin(radians) * radius;
+    return { ...contact, left, top };
+  });
+}
+
+function hashString(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash);
+}
+
+function initialsFromName(name: string) {
+  const parts = name.split(' ').filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
+  return `${parts[0].slice(0, 1)}${parts[parts.length - 1].slice(0, 1)}`.toUpperCase();
 }
 
 const styles = StyleSheet.create({
@@ -394,6 +449,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     overflow: 'hidden',
     backgroundColor: '#DBE9DB',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  contactInitials: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   contactImage: {
     width: '100%',
