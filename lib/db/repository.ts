@@ -277,10 +277,21 @@ export async function getContactsBySystemIds(systemIds: string[]): Promise<Conta
   return rows.map(fromContactRow);
 }
 
-async function listContactsForViews(): Promise<GardenContactRow[]> {
+async function listContactsForViews(searchQuery?: string): Promise<GardenContactRow[]> {
   const db = await getDatabase();
   const config = await getConfig();
+  const normalizedQuery = searchQuery?.trim() ?? '';
+  const hasSearch = normalizedQuery.length > 0;
+  const likeQuery = `%${normalizedQuery}%`;
 
+  const args: (string | number)[] = [
+    config.defaultCadenceInnerDays,
+    config.defaultCadenceMidDays,
+    config.defaultCadenceOuterDays,
+  ];
+  if (hasSearch) {
+    args.push(likeQuery, likeQuery);
+  }
   const rows = await db.getAllAsync<ContactListBaseRow>(
     `SELECT
        c.system_id,
@@ -309,8 +320,9 @@ async function listContactsForViews(): Promise<GardenContactRow[]> {
        SELECT contact_system_id, MAX(created_at) AS last_spoke_at
        FROM contact_logs
        GROUP BY contact_system_id
-     ) ll ON ll.contact_system_id = c.system_id`,
-    [config.defaultCadenceInnerDays, config.defaultCadenceMidDays, config.defaultCadenceOuterDays]
+     ) ll ON ll.contact_system_id = c.system_id
+     ${hasSearch ? `WHERE c.full_name LIKE ? COLLATE NOCASE OR c.nick_name LIKE ? COLLATE NOCASE` : ''}`,
+    args
   );
 
   return rows
@@ -340,8 +352,8 @@ async function listContactsForViews(): Promise<GardenContactRow[]> {
     });
 }
 
-export async function getGardenContacts(): Promise<GardenContactRow[]> {
-  return listContactsForViews();
+export async function getGardenContacts(searchQuery?: string): Promise<GardenContactRow[]> {
+  return listContactsForViews(searchQuery);
 }
 
 export async function getUpNextContacts(): Promise<UpNextContactRow[]> {

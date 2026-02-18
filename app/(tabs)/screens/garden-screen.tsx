@@ -43,6 +43,7 @@ export function GardenScreen() {
   const ZOOM_STEP = 0.2;
   const [zoom, setZoom] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [contacts, setContacts] = useState<GardenContactRow[]>([]);
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -52,9 +53,9 @@ export function GardenScreen() {
   const dragStart = useRef({ x: 0, y: 0 });
 
   const reload = useCallback(async () => {
-    const rows = await getGardenContacts();
+    const rows = await getGardenContacts(searchQuery);
     setContacts(rows);
-  }, []);
+  }, [searchQuery]);
 
   useFocusEffect(
     useCallback(() => {
@@ -157,13 +158,6 @@ export function GardenScreen() {
               My Garden
             </GardenText>
           </View>
-          <Pressable style={styles.iconButton}>
-            <MaterialIcons
-              name="notifications-none"
-              size={20}
-              color={GardenColors.sage}
-            />
-          </Pressable>
         </View>
         <View style={styles.searchWrap}>
           <MaterialIcons name="search" size={20} color={GardenColors.stone} />
@@ -171,6 +165,8 @@ export function GardenScreen() {
             placeholder="Find someone in your rings..."
             placeholderTextColor={GardenColors.stone}
             style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
           />
         </View>
       </View>
@@ -395,14 +391,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 34,
     lineHeight: 36,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: GardenRadius.chip,
-    backgroundColor: "#E9F2E9",
-    alignItems: "center",
-    justifyContent: "center",
   },
   searchWrap: {
     height: 46,
