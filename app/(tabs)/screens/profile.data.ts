@@ -108,7 +108,7 @@ export const profileActions = [
     id: 'export',
     icon: 'feed',
     title: 'Export',
-    subtitle: 'CSV Format',
+    subtitle: 'XLSX Format',
     tone: 'orange' as const,
   },
 ];

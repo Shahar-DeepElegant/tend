@@ -1,7 +1,10 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import * as Sharing from "expo-sharing";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+    Alert,
+    Platform,
     Pressable,
     SafeAreaView,
     ScrollView,
@@ -18,6 +21,10 @@ import {
     GardenSpacing,
 } from "@/constants/design-system";
 import { getConfig, updateConfig, type AppConfig } from "@/lib/db";
+import {
+  createDatabaseBackupFile,
+  createXlsxExportFile,
+} from "@/lib/export/profile-export";
 import { rescheduleOnConfigChange } from "@/lib/notifications";
 
 import {
@@ -35,6 +42,9 @@ export function ProfileScreen() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
   const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
+  const [busyActionId, setBusyActionId] = useState<"backup" | "export" | null>(
+    null,
+  );
 
   const reload = useCallback(async () => {
     const value = await getConfig();
@@ -71,6 +81,54 @@ export function ProfileScreen() {
   const toggles: Record<ProfileToggleId, boolean> = {
     fuzzyReminders: config?.fuzzyRemindersEnabled ?? true,
     automaticLogMode: config?.automaticLogging ?? false,
+  };
+
+  const handleActionPress = async (actionId: "backup" | "export") => {
+    if (busyActionId) return;
+
+    if (Platform.OS === "web") {
+      Alert.alert(
+        "Unavailable on web",
+        "Backup and export are currently supported on iOS and Android only.",
+      );
+      return;
+    }
+
+    setBusyActionId(actionId);
+    try {
+      const canShare = await Sharing.isAvailableAsync();
+      if (!canShare) {
+        throw new Error("File sharing is not available on this device.");
+      }
+
+      const file =
+        actionId === "backup"
+          ? await createDatabaseBackupFile()
+          : await createXlsxExportFile();
+
+      await Sharing.shareAsync(file.uri, {
+        dialogTitle:
+          actionId === "backup"
+            ? "Share database backup"
+            : "Share contacts and logs export",
+        mimeType:
+          actionId === "backup"
+            ? "application/octet-stream"
+            : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        UTI:
+          actionId === "backup"
+            ? "public.database"
+            : "org.openxmlformats.spreadsheetml.sheet",
+      });
+    } catch (error) {
+      console.error(`Failed to ${actionId}`, error);
+      Alert.alert(
+        `Unable to ${actionId}`,
+        "Something went wrong while preparing this file. Please try again.",
+      );
+    } finally {
+      setBusyActionId(null);
+    }
   };
 
   return (
@@ -128,7 +186,17 @@ export function ProfileScreen() {
           </GardenText>
           <View style={styles.actionGrid}>
             {profileActions.map((action) => (
-              <Pressable key={action.id} style={styles.actionButton}>
+              <Pressable
+                key={action.id}
+                style={[
+                  styles.actionButton,
+                  busyActionId ? styles.actionButtonDisabled : null,
+                ]}
+                onPress={() =>
+                  handleActionPress(action.id as "backup" | "export")
+                }
+                disabled={busyActionId !== null}
+              >
                 <View
                   style={[
                     styles.actionIconWrap,
@@ -397,6 +465,9 @@ const styles = StyleSheet.create({
     borderColor: "rgba(90,125,88,0.08)",
     backgroundColor: GardenColors.white,
     gap: 6,
+  },
+  actionButtonDisabled: {
+    opacity: 0.65,
   },
   actionIconWrap: {
     width: 48,

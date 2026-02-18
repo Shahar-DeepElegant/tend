@@ -35,6 +35,27 @@ export type ContactLogRecord = {
   wasOverdue: boolean;
 };
 
+export type ContactExportRow = {
+  systemId: string;
+  fullName: string;
+  nickName: string | null;
+  imageUri: string | null;
+  description: string | null;
+  circleId: CircleId;
+  customReminderDays: number | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ContactLogExportRow = {
+  id: number;
+  contactSystemId: string;
+  contactFullName: string;
+  createdAt: string;
+  summary: string;
+  wasOverdue: boolean;
+};
+
 export type AppConfig = {
   defaultCadenceInnerDays: number;
   defaultCadenceMidDays: number;

@@ -5,7 +5,9 @@ import type {
   CircleId,
   ContactEventInput,
   ContactEventRecord,
+  ContactExportRow,
   ContactInput,
+  ContactLogExportRow,
   ContactLogRecord,
   ContactRecord,
   ContactUpdatePatch,
@@ -66,6 +68,15 @@ type ContactListBaseRow = {
 type LogRowDb = {
   id: number;
   contact_system_id: string;
+  created_at: string;
+  summary: string;
+  was_overdue: 0 | 1;
+};
+
+type ExportLogRowDb = {
+  id: number;
+  contact_system_id: string;
+  contact_full_name: string;
   created_at: string;
   summary: string;
   was_overdue: 0 | 1;
@@ -305,6 +316,45 @@ export async function getAllContacts(): Promise<ContactRecord[]> {
   const db = await getDatabase();
   const rows = await db.getAllAsync<ContactRowDb>(`SELECT * FROM contacts ORDER BY full_name COLLATE NOCASE ASC`);
   return rows.map(fromContactRow);
+}
+
+export async function getAllContactsForExport(): Promise<ContactExportRow[]> {
+  const rows = await getAllContacts();
+  return rows.map((row) => ({
+    systemId: row.systemId,
+    fullName: row.fullName,
+    nickName: row.nickName,
+    imageUri: row.imageUri,
+    description: row.description,
+    circleId: row.circleId,
+    customReminderDays: row.customReminderDays,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  }));
+}
+
+export async function getAllLogsForExport(): Promise<ContactLogExportRow[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<ExportLogRowDb>(
+    `SELECT
+      l.id,
+      l.contact_system_id,
+      c.full_name AS contact_full_name,
+      l.created_at,
+      l.summary,
+      l.was_overdue
+     FROM contact_logs l
+     INNER JOIN contacts c ON c.system_id = l.contact_system_id
+     ORDER BY l.created_at DESC, l.id DESC`
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    contactSystemId: row.contact_system_id,
+    contactFullName: row.contact_full_name,
+    createdAt: sqlNowToISO(row.created_at) ?? new Date().toISOString(),
+    summary: row.summary,
+    wasOverdue: row.was_overdue === 1,
+  }));
 }
 
 export async function getContactsBySystemIds(systemIds: string[]): Promise<ContactRecord[]> {
