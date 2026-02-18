@@ -6,6 +6,7 @@ import type {
   ContactInput,
   ContactLogRecord,
   ContactRecord,
+  ContactUpdatePatch,
   GardenContactRow,
   LeafProfileData,
   UpNextContactRow,
@@ -229,6 +230,34 @@ export async function upsertContact(input: ContactInput) {
       input.customReminderDays ?? null,
     ]
   );
+}
+
+export async function updateContactFields(systemId: string, patch: ContactUpdatePatch) {
+  const db = await getDatabase();
+  const clauses: string[] = [];
+  const args: (string | number | null)[] = [];
+
+  if (patch.description !== undefined) {
+    clauses.push('description = ?');
+    args.push(patch.description);
+  }
+
+  if (patch.customReminderDays !== undefined) {
+    clauses.push('custom_reminder_days = ?');
+    args.push(patch.customReminderDays);
+  }
+
+  if (clauses.length === 0) return;
+
+  clauses.push("updated_at=datetime('now')");
+  args.push(systemId);
+
+  await db.runAsync(`UPDATE contacts SET ${clauses.join(', ')} WHERE system_id = ?`, args);
+}
+
+export async function deleteContact(systemId: string) {
+  const db = await getDatabase();
+  await db.runAsync(`DELETE FROM contacts WHERE system_id = ?`, [systemId]);
 }
 
 export async function getAllContacts(): Promise<ContactRecord[]> {

@@ -22,6 +22,11 @@ export type ContactInput = {
   customReminderDays?: number | null;
 };
 
+export type ContactUpdatePatch = {
+  description?: string | null;
+  customReminderDays?: number | null;
+};
+
 export type ContactLogRecord = {
   id: number;
   contactSystemId: string;

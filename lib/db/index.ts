@@ -1,5 +1,6 @@
 export { initDatabase } from './sqlite';
 export {
+  deleteContact,
   formatLastSpokeLabel,
   getAllContacts,
   getContactsBySystemIds,
@@ -11,6 +12,15 @@ export {
   getUpNextContacts,
   insertContactLog,
   updateConfig,
+  updateContactFields,
   upsertContact,
 } from './repository';
-export type { AppConfig, CircleId, ContactInput, ContactRecord, GardenContactRow, UpNextContactRow } from './types';
+export type {
+  AppConfig,
+  CircleId,
+  ContactInput,
+  ContactRecord,
+  ContactUpdatePatch,
+  GardenContactRow,
+  UpNextContactRow,
+} from './types';
