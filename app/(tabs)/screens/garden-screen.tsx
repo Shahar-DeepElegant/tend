@@ -31,13 +31,9 @@ import {
     type CircleId,
     type GardenContactRow,
 } from "@/lib/db";
+import { RING_LAYOUT, layoutRingItems, type OrbitPoint } from "@/lib/garden/avatar-layout";
 
 import { AddContactModal } from "./up-next/add-contact-modal";
-
-type OrbitContact = GardenContactRow & {
-  left: number;
-  top: number;
-};
 
 export function GardenScreen() {
   const router = useRouter();
@@ -68,18 +64,9 @@ export function GardenScreen() {
 
   const contactsByRing = useMemo(
     () => ({
-      inner: withPositions(
-        contacts.filter((contact) => contact.circleId === "inner"),
-        "inner",
-      ),
-      mid: withPositions(
-        contacts.filter((contact) => contact.circleId === "mid"),
-        "mid",
-      ),
-      outer: withPositions(
-        contacts.filter((contact) => contact.circleId === "outer"),
-        "outer",
-      ),
+      inner: contacts.filter((contact) => contact.circleId === "inner"),
+      mid: contacts.filter((contact) => contact.circleId === "mid"),
+      outer: contacts.filter((contact) => contact.circleId === "outer"),
     }),
     [contacts],
   );
@@ -265,20 +252,19 @@ export function GardenScreen() {
 }
 
 function renderContacts(
-  contacts: OrbitContact[],
+  contacts: GardenContactRow[],
   ring: CircleId,
   router: ReturnType<typeof useRouter>,
   zoom: number,
 ) {
-  const visibleLimit = getVisibleLimit(ring, zoom);
-  const visibleContacts = contacts.slice(0, visibleLimit);
-  const hiddenCount = Math.max(contacts.length - visibleContacts.length, 0);
-  const size = ring === "inner" ? 48 : ring === "mid" ? 40 : 30;
-  const borderWidth = ring === "inner" ? 2 : 1;
+  const slots = layoutRingItems(ring, contacts, zoom);
+  const layout = RING_LAYOUT[ring];
+  const size = layout.avatarSizePx;
+  const borderWidth = layout.borderWidthPx;
 
   return (
     <>
-      {visibleContacts.map((contact) => (
+      {slots.visibleItems.map(({ item: contact, point }) => (
         <Pressable
           key={contact.systemId}
           onPress={() =>
@@ -290,8 +276,8 @@ function renderContacts(
           style={[
             styles.contactAvatar,
             {
-              left: `${contact.left}%`,
-              top: `${contact.top}%`,
+              left: `${point.leftPercent}%`,
+              top: `${point.topPercent}%`,
               width: size,
               height: size,
               marginLeft: -size / 2,
@@ -315,8 +301,12 @@ function renderContacts(
           {contact.isOverdue ? <View style={styles.waterBadge} /> : null}
         </Pressable>
       ))}
-      {hiddenCount > 0 ? (
-        <OverflowAvatar ring={ring} hiddenCount={hiddenCount} />
+      {slots.overflow ? (
+        <OverflowAvatar
+          ring={ring}
+          hiddenCount={slots.overflow.hiddenCount}
+          point={slots.overflow.point}
+        />
       ) : null}
     </>
   );
@@ -325,24 +315,21 @@ function renderContacts(
 function OverflowAvatar({
   ring,
   hiddenCount,
+  point,
 }: {
   ring: CircleId;
   hiddenCount: number;
+  point: OrbitPoint;
 }) {
-  const size = ring === "inner" ? 42 : ring === "mid" ? 36 : 30;
-  const position: StyleProp<ViewStyle> =
-    ring === "inner"
-      ? ({ left: "82%" as const, top: "16%" as const } satisfies ViewStyle)
-      : ring === "mid"
-        ? ({ left: "83%" as const, top: "82%" as const } satisfies ViewStyle)
-        : ({ left: "14%" as const, top: "14%" as const } satisfies ViewStyle);
+  const size = RING_LAYOUT[ring].avatarSizePx;
 
   return (
     <View
       style={[
         styles.overflowAvatar,
-        position,
         {
+          left: `${point.leftPercent}%`,
+          top: `${point.topPercent}%`,
           width: size,
           height: size,
           marginLeft: -size / 2,
@@ -362,12 +349,6 @@ function OverflowAvatar({
   );
 }
 
-function getVisibleLimit(ring: CircleId, zoom: number) {
-  const base = ring === "inner" ? 3 : ring === "mid" ? 4 : 4;
-  const boost = Math.max(0, Math.floor((zoom - 1) * 8));
-  return base + boost;
-}
-
 function Ring({
   style,
   label,
@@ -382,32 +363,6 @@ function Ring({
       </GardenText>
     </View>
   );
-}
-
-function withPositions(
-  contacts: GardenContactRow[],
-  ring: CircleId,
-): OrbitContact[] {
-  return contacts.map((contact, index) => {
-    const hash = hashString(contact.systemId);
-    const angle = (hash % 360) + index * 17;
-    const ringRadius = ring === "inner" ? 20 : ring === "mid" ? 34 : 45;
-    const variance = ((hash % 17) - 8) * 0.4;
-    const radius = ringRadius + variance;
-    const radians = (angle * Math.PI) / 180;
-    const left = 50 + Math.cos(radians) * radius;
-    const top = 50 + Math.sin(radians) * radius;
-    return { ...contact, left, top };
-  });
-}
-
-function hashString(value: string) {
-  let hash = 0;
-  for (let i = 0; i < value.length; i += 1) {
-    hash = (hash << 5) - hash + value.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
 }
 
 function initialsFromName(name: string) {
