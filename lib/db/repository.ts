@@ -3,12 +3,15 @@ import type {
   AppConfig,
   AppConfigUpdate,
   CircleId,
+  ContactEventInput,
+  ContactEventRecord,
   ContactInput,
   ContactLogRecord,
   ContactRecord,
   ContactUpdatePatch,
   GardenContactRow,
   LeafProfileData,
+  NotificationStateRecord,
   UpNextContactRow,
 } from './types';
 
@@ -68,6 +71,27 @@ type LogRowDb = {
   was_overdue: 0 | 1;
 };
 
+type ContactEventRowDb = {
+  id: number;
+  contact_system_id: string;
+  source_event_id: string;
+  event_type: 'birthday' | 'anniversary' | 'custom';
+  label: string | null;
+  month: number;
+  day: number;
+  year: number | null;
+  next_occurrence_at: string;
+  is_active: 0 | 1;
+  created_at: string;
+  updated_at: string;
+};
+
+type RuntimeStateRowDb = {
+  key: string;
+  value_text: string | null;
+  updated_at: string;
+};
+
 function toBool(value: number | null | undefined, fallback: boolean) {
   if (value === null || value === undefined) return fallback;
   return value === 1;
@@ -106,6 +130,23 @@ function sqlNowToISO(sqlDate: string | null) {
 function isoToSqlDate(input?: string) {
   if (!input) return null;
   return new Date(input).toISOString().slice(0, 19).replace('T', ' ');
+}
+
+function toNextOccurrenceISO(month: number, day: number, nowDate = new Date()) {
+  const safeMonth = Math.max(1, Math.min(12, month));
+  const safeDay = Math.max(1, Math.min(31, day));
+  const year = nowDate.getFullYear();
+  let candidate = new Date(year, safeMonth - 1, safeDay, 9, 0, 0, 0);
+  if (candidate.getMonth() !== safeMonth - 1) {
+    candidate = new Date(year, safeMonth, 0, 9, 0, 0, 0);
+  }
+  if (candidate.getTime() < nowDate.getTime()) {
+    candidate = new Date(year + 1, safeMonth - 1, safeDay, 9, 0, 0, 0);
+    if (candidate.getMonth() !== safeMonth - 1) {
+      candidate = new Date(year + 1, safeMonth, 0, 9, 0, 0, 0);
+    }
+  }
+  return candidate.toISOString();
 }
 
 function fromContactRow(row: ContactRowDb): ContactRecord {
@@ -362,6 +403,155 @@ export async function getUpNextContacts(): Promise<UpNextContactRow[]> {
     if (a.overdueSeconds !== b.overdueSeconds) return b.overdueSeconds - a.overdueSeconds;
     return a.fullName.localeCompare(b.fullName);
   });
+}
+
+export async function getOverdueContacts(nowISO?: string): Promise<UpNextContactRow[]> {
+  const rows = await getUpNextContacts();
+  if (!nowISO) {
+    return rows.filter((row) => row.overdueSeconds > 0);
+  }
+  const nowMs = new Date(nowISO).getTime();
+  return rows.filter((row) => row.dueAt && new Date(row.dueAt).getTime() < nowMs);
+}
+
+function mapContactEventRow(row: ContactEventRowDb): ContactEventRecord {
+  return {
+    id: row.id,
+    contactSystemId: row.contact_system_id,
+    sourceEventId: row.source_event_id,
+    label: row.label,
+    eventType: row.event_type,
+    month: row.month,
+    day: row.day,
+    year: row.year,
+    nextOccurrenceAt: sqlNowToISO(row.next_occurrence_at) ?? new Date().toISOString(),
+    isActive: row.is_active === 1,
+    createdAt: sqlNowToISO(row.created_at) ?? new Date().toISOString(),
+    updatedAt: sqlNowToISO(row.updated_at) ?? new Date().toISOString(),
+  };
+}
+
+export async function upsertContactEvents(contactSystemId: string, events: ContactEventInput[]) {
+  const db = await getDatabase();
+  const now = new Date();
+  await db.withTransactionAsync(async () => {
+    for (const event of events) {
+      const nextOccurrence = toNextOccurrenceISO(event.month, event.day, now);
+      await db.runAsync(
+        `INSERT INTO contact_events (
+          contact_system_id,
+          source_event_id,
+          event_type,
+          label,
+          month,
+          day,
+          year,
+          next_occurrence_at,
+          is_active,
+          updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(contact_system_id, source_event_id) DO UPDATE SET
+          event_type=excluded.event_type,
+          label=excluded.label,
+          month=excluded.month,
+          day=excluded.day,
+          year=excluded.year,
+          next_occurrence_at=excluded.next_occurrence_at,
+          is_active=excluded.is_active,
+          updated_at=datetime('now')`,
+        [
+          contactSystemId,
+          event.sourceEventId,
+          event.eventType,
+          event.label ?? null,
+          event.month,
+          event.day,
+          event.year ?? null,
+          isoToSqlDate(nextOccurrence),
+          event.isActive === false ? 0 : 1,
+        ]
+      );
+    }
+  });
+}
+
+export async function replaceContactEventsForContact(contactSystemId: string, events: ContactEventInput[]) {
+  const db = await getDatabase();
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(`DELETE FROM contact_events WHERE contact_system_id = ?`, [contactSystemId]);
+    if (events.length === 0) return;
+    for (const event of events) {
+      const nextOccurrence = toNextOccurrenceISO(event.month, event.day);
+      await db.runAsync(
+        `INSERT INTO contact_events (
+          contact_system_id,
+          source_event_id,
+          event_type,
+          label,
+          month,
+          day,
+          year,
+          next_occurrence_at,
+          is_active
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          contactSystemId,
+          event.sourceEventId,
+          event.eventType,
+          event.label ?? null,
+          event.month,
+          event.day,
+          event.year ?? null,
+          isoToSqlDate(nextOccurrence),
+          event.isActive === false ? 0 : 1,
+        ]
+      );
+    }
+  });
+}
+
+export async function getUpcomingContactEvents(leadDays: number, nowISO?: string): Promise<ContactEventRecord[]> {
+  const db = await getDatabase();
+  const rows = await db.getAllAsync<ContactEventRowDb>(
+    `SELECT *
+     FROM contact_events
+     WHERE is_active = 1
+     ORDER BY next_occurrence_at ASC`
+  );
+  const nowMs = nowISO ? new Date(nowISO).getTime() : Date.now();
+  const endMs = nowMs + Math.max(0, leadDays) * 24 * 60 * 60 * 1000;
+  return rows
+    .map(mapContactEventRow)
+    .filter((row) => {
+      const eventMs = new Date(row.nextOccurrenceAt).getTime();
+      return eventMs >= nowMs && eventMs <= endMs;
+    });
+}
+
+export async function getNotificationState(key: string): Promise<NotificationStateRecord | null> {
+  const db = await getDatabase();
+  const row = await db.getFirstAsync<RuntimeStateRowDb>(
+    `SELECT key, value_text, updated_at FROM app_runtime_state WHERE key = ?`,
+    [key]
+  );
+  if (!row) return null;
+  return {
+    key: row.key,
+    valueText: row.value_text,
+    updatedAt: sqlNowToISO(row.updated_at) ?? new Date().toISOString(),
+  };
+}
+
+export async function setNotificationState(key: string, valueText: string | null) {
+  const db = await getDatabase();
+  await db.runAsync(
+    `INSERT INTO app_runtime_state (key, value_text, updated_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(key) DO UPDATE SET
+       value_text=excluded.value_text,
+       updated_at=datetime('now')`,
+    [key, valueText]
+  );
 }
 
 export async function getLatestLogsByContact(contactSystemId: string, limit = 31): Promise<ContactLogRecord[]> {

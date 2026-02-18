@@ -309,7 +309,12 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                   );
                 })}
               </ScrollView>
-              <Pressable onPress={handleAddSeeds} style={[styles.cta, saving ? styles.ctaDisabled : null]} disabled={saving}>
+              <Pressable
+                onPress={() => {
+                  void handleAddSeeds();
+                }}
+                style={[styles.cta, saving ? styles.ctaDisabled : null]}
+                disabled={saving}>
                 <GardenText variant="button" color={GardenColors.white}>
                   {saving ? 'Adding...' : 'Add Seeds to Garden'}
                 </GardenText>

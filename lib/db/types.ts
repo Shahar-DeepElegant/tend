@@ -48,6 +48,39 @@ export type AppConfig = {
 
 export type AppConfigUpdate = Partial<AppConfig>;
 
+export type ContactEventType = 'birthday' | 'anniversary' | 'custom';
+
+export type ContactEventRecord = {
+  id: number;
+  contactSystemId: string;
+  sourceEventId: string;
+  label: string | null;
+  eventType: ContactEventType;
+  month: number;
+  day: number;
+  year: number | null;
+  nextOccurrenceAt: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ContactEventInput = {
+  sourceEventId: string;
+  label?: string | null;
+  eventType: ContactEventType;
+  month: number;
+  day: number;
+  year?: number | null;
+  isActive?: boolean;
+};
+
+export type NotificationStateRecord = {
+  key: string;
+  valueText: string | null;
+  updatedAt: string;
+};
+
 export type GardenContactRow = {
   systemId: string;
   fullName: string;

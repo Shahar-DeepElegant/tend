@@ -24,12 +24,13 @@ import {
     GardenSpacing,
 } from "@/constants/design-system";
 import {
-    deleteContact,
-    getFirstContactId,
-    getLeafProfileData,
-    updateContactFields,
+  deleteContact,
+  getFirstContactId,
+  getLeafProfileData,
+  updateContactFields,
 } from "@/lib/db";
 import type { ContactLogRecord, LeafProfileData } from "@/lib/db/types";
+import { runDailyReminderEvaluation } from "@/lib/notifications";
 
 type GrowthRingType = "coffee" | "call" | "text" | "email";
 type MessageChannel = "whatsapp" | "telegram" | "instagram" | "mail";
@@ -245,6 +246,7 @@ export function LeafProfileScreen() {
               setDeleteBusy(true);
               try {
                 await deleteContact(profile.contact.systemId);
+                await runDailyReminderEvaluation({ source: "focus", force: true });
                 router.replace("/");
               } catch {
                 Alert.alert("Unable to delete contact", "Please try again.");

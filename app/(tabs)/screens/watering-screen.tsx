@@ -7,6 +7,7 @@ import { Pressable, SafeAreaView, StyleSheet, TextInput, View } from 'react-nati
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
 import { getFirstContactId, getLeafProfileData, insertContactLog } from '@/lib/db/repository';
+import { clearOverduePersistentIfResolved } from '@/lib/notifications';
 
 import { interactionOptions, type WateringInteraction } from './watering.data';
 
@@ -51,6 +52,7 @@ export function WateringScreen() {
     try {
       const summary = `${interaction}: ${notes.trim() || 'No summary provided.'}`;
       await insertContactLog({ contactSystemId: contact.id, summary });
+      await clearOverduePersistentIfResolved();
       router.back();
     } finally {
       setSaving(false);

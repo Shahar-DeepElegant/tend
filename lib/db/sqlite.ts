@@ -1,7 +1,7 @@
 import * as SQLite from 'expo-sqlite';
 
 const DB_NAME = 'friendly-reminder.db';
-const TARGET_DB_VERSION = 1;
+const TARGET_DB_VERSION = 2;
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
@@ -72,11 +72,44 @@ async function migrateToV1(db: SQLite.SQLiteDatabase) {
 
 async function runMigrations(db: SQLite.SQLiteDatabase) {
   const versionRow = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
-  const currentVersion = versionRow?.user_version ?? 0;
+  let currentVersion = versionRow?.user_version ?? 0;
 
   if (currentVersion < 1) {
     await migrateToV1(db);
+    currentVersion = 1;
     await db.execAsync('PRAGMA user_version = 1;');
+  }
+
+  if (currentVersion < 2) {
+    await db.execAsync(`
+      CREATE TABLE IF NOT EXISTS contact_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        contact_system_id TEXT NOT NULL,
+        source_event_id TEXT NOT NULL,
+        event_type TEXT NOT NULL CHECK (event_type IN ('birthday','anniversary','custom')),
+        label TEXT,
+        month INTEGER NOT NULL,
+        day INTEGER NOT NULL,
+        year INTEGER,
+        next_occurrence_at TEXT NOT NULL,
+        is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0,1)),
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        FOREIGN KEY(contact_system_id) REFERENCES contacts(system_id) ON DELETE CASCADE,
+        UNIQUE(contact_system_id, source_event_id)
+      );
+
+      CREATE TABLE IF NOT EXISTS app_runtime_state (
+        key TEXT PRIMARY KEY NOT NULL,
+        value_text TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_contact_events_contact ON contact_events(contact_system_id);
+      CREATE INDEX IF NOT EXISTS idx_contact_events_next_occurrence ON contact_events(next_occurrence_at);
+    `);
+    currentVersion = 2;
+    await db.execAsync('PRAGMA user_version = 2;');
   }
 
   if (currentVersion > TARGET_DB_VERSION) {

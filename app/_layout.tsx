@@ -12,6 +12,7 @@ import { YoungSerif_400Regular } from '@expo-google-fonts/young-serif';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { initDatabase } from '@/lib/db';
+import { initNotifications } from '@/lib/notifications';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -36,9 +37,14 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
-    initDatabase().catch((error) => {
-      console.error('Failed to initialize database', error);
-    });
+    (async () => {
+      try {
+        await initDatabase();
+        await initNotifications();
+      } catch (error) {
+        console.error('Failed to initialize app services', error);
+      }
+    })();
   }, []);
 
   if (!loaded) {

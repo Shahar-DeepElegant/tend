@@ -7,6 +7,7 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Switch, View } from 'r
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
 import { getConfig, updateConfig, type AppConfig } from '@/lib/db';
+import { rescheduleOnConfigChange } from '@/lib/notifications';
 
 import { profileActions, profileHeader, profileSections, type ProfileRow, type ProfileToggleId } from './profile.data';
 import { CustomCirclesModal } from './profile/custom-circles-modal';
@@ -170,7 +171,14 @@ export function ProfileScreen() {
         initialReminderTime={config?.reminderNotificationTime ?? '10:00'}
         initialContactEventsReminderDays={config?.contactEventsReminderDays ?? 7}
         onSave={(value) => {
-          updateConfig(value).then(reload);
+          updateConfig(value)
+            .then(async () => {
+              await reload();
+              await rescheduleOnConfigChange();
+            })
+            .catch((error) => {
+              console.error('Failed to update reminder settings', error);
+            });
         }}
       />
     </SafeAreaView>
