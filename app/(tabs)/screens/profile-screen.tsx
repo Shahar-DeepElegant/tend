@@ -1,5 +1,4 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { Image } from "expo-image";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
 import {
@@ -84,18 +83,6 @@ export function ProfileScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={styles.headerTop}>
-            <Pressable style={styles.backAction}>
-              <MaterialIcons
-                name="arrow-back"
-                size={22}
-                color={GardenColors.sage}
-              />
-            </Pressable>
-            <View style={styles.avatarWrap}>
-              <Image source={profileHeader.avatar} style={styles.avatar} />
-            </View>
-          </View>
           <GardenText variant="title" style={styles.title}>
             {profileHeader.title}
           </GardenText>
