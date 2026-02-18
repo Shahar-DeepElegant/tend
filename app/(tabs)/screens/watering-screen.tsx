@@ -2,7 +2,8 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { Image } from 'expo-image';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Pressable, SafeAreaView, StyleSheet, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
@@ -12,6 +13,7 @@ import { clearOverduePersistentIfResolved } from '@/lib/notifications';
 import { interactionOptions, type WateringInteraction } from './watering.data';
 
 export function WateringScreen() {
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const params = useLocalSearchParams<{ contactId?: string }>();
   const [interaction, setInteraction] = useState<WateringInteraction>('coffee');
@@ -60,10 +62,12 @@ export function WateringScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.screen}>
-      <View style={styles.sheet}>
-        <View style={styles.handle} />
-
+    <View style={styles.screen}>
+      <View
+        style={[
+          styles.sheet,
+          { paddingTop: insets.top + GardenSpacing.sm, paddingBottom: insets.bottom + GardenSpacing.xl },
+        ]}>
         <View style={styles.header}>
           <View style={styles.avatarWrap}>
             {contact.imageUri ? (
@@ -137,7 +141,7 @@ export function WateringScreen() {
           </GardenText>
         </Pressable>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -159,24 +163,13 @@ function initialsFromName(name: string) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#EAE6DB',
-    justifyContent: 'flex-end',
+    backgroundColor: GardenColors.cream,
   },
   sheet: {
+    flex: 1,
     backgroundColor: GardenColors.cream,
-    borderTopLeftRadius: 40,
-    borderTopRightRadius: 40,
     paddingHorizontal: GardenSpacing.md,
-    paddingTop: GardenSpacing.sm,
-    paddingBottom: GardenSpacing.xl,
     gap: GardenSpacing.md,
-  },
-  handle: {
-    alignSelf: 'center',
-    width: 50,
-    height: 6,
-    borderRadius: GardenRadius.chip,
-    backgroundColor: '#C6CDC4',
   },
   header: {
     alignItems: 'center',
