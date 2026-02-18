@@ -6,8 +6,8 @@ import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, TextInput, View
 import { GardenCard, GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenFonts, GardenRadius, GardenSpacing } from '@/constants/design-system';
 import { canImportContactsOnCurrentPlatform, listImportContacts, type ImportContact } from '@/lib/contacts/provider';
-import { upsertContact } from '@/lib/db';
-import type { CircleId } from '@/lib/db';
+import { getContactsBySystemIds, upsertContact } from '@/lib/db';
+import type { CircleId, ContactRecord } from '@/lib/db';
 
 type Step = 1 | 2;
 type Circle = 'Inner Circle' | 'Mid Circle' | 'Outer Circle';
@@ -34,9 +34,12 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   const [step, setStep] = useState<Step>(1);
   const [query, setQuery] = useState('');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedContactById, setSelectedContactById] = useState<Record<string, ImportContact>>({});
+  const [existingContactsById, setExistingContactsById] = useState<Record<string, ContactRecord>>({});
   const [circleById, setCircleById] = useState<Record<string, Circle>>({});
   const [sourceContacts, setSourceContacts] = useState<ImportContact[]>([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
+  const [continuing, setContinuing] = useState(false);
   const [saving, setSaving] = useState(false);
   const canImport = canImportContactsOnCurrentPlatform();
 
@@ -45,6 +48,8 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
       setStep(1);
       setQuery('');
       setSelectedIds([]);
+      setSelectedContactById({});
+      setExistingContactsById({});
       setCircleById({});
       return;
     }
@@ -83,14 +88,19 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   }, [query, visible]);
 
   const selectedContacts = useMemo(
-    () => sourceContacts.filter((contact) => selectedIds.includes(contact.systemId)),
-    [sourceContacts, selectedIds]
+    () => selectedIds.map((id) => selectedContactById[id]).filter((contact): contact is ImportContact => !!contact),
+    [selectedContactById, selectedIds]
   );
 
   const toggleSelected = (id: string) => {
     const alreadySelected = selectedIds.includes(id);
     if (alreadySelected) {
       setSelectedIds((current) => current.filter((itemId) => itemId !== id));
+      setSelectedContactById((existing) => {
+        const next = { ...existing };
+        delete next[id];
+        return next;
+      });
       setCircleById((existing) => {
         const next = { ...existing };
         delete next[id];
@@ -99,30 +109,60 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
       return;
     }
 
+    const contact = sourceContacts.find((item) => item.systemId === id);
+    if (!contact) return;
     setSelectedIds((current) => [...current, id]);
+    setSelectedContactById((existing) => ({ ...existing, [id]: contact }));
     setCircleById((existing) => ({ ...existing, [id]: existing[id] ?? 'Mid Circle' }));
   };
 
-  const handleAddSeeds = async () => {
+  const handleAddSeeds = async (existingByIdOverride?: Record<string, ContactRecord>) => {
     if (selectedContacts.length === 0) return;
+    const existingById = existingByIdOverride ?? existingContactsById;
     setSaving(true);
     try {
       for (const contact of selectedContacts) {
+        const existingContact = existingById[contact.systemId];
         const selectedCircle = circleById[contact.systemId] ?? 'Mid Circle';
         await upsertContact({
           systemId: contact.systemId,
           fullName: contact.fullName,
           nickName: contact.nickName,
           imageUri: contact.imageUri,
-          description: null,
-          circleId: circleByLabel[selectedCircle],
-          customReminderDays: null,
+          description: existingContact?.description ?? null,
+          circleId: existingContact?.circleId ?? circleByLabel[selectedCircle],
+          customReminderDays: existingContact?.customReminderDays ?? null,
         });
       }
       onAdded?.();
       onClose();
     } finally {
       setSaving(false);
+    }
+  };
+
+  const contactsNeedingCircle = useMemo(
+    () => selectedContacts.filter((contact) => !existingContactsById[contact.systemId]),
+    [existingContactsById, selectedContacts]
+  );
+
+  const handleContinue = async () => {
+    if (selectedIds.length === 0) return;
+    setContinuing(true);
+    try {
+      const existingContacts = await getContactsBySystemIds(selectedIds);
+      const nextExistingById = Object.fromEntries(existingContacts.map((contact) => [contact.systemId, contact]));
+      setExistingContactsById(nextExistingById);
+
+      const hasNewContact = selectedIds.some((id) => !nextExistingById[id]);
+      if (!hasNewContact) {
+        await handleAddSeeds(nextExistingById);
+        return;
+      }
+
+      setStep(2);
+    } finally {
+      setContinuing(false);
     }
   };
 
@@ -208,11 +248,11 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                 })}
               </ScrollView>
               <Pressable
-                disabled={selectedIds.length === 0}
-                onPress={() => setStep(2)}
-                style={[styles.cta, selectedIds.length === 0 ? styles.ctaDisabled : null]}>
+                disabled={selectedIds.length === 0 || continuing || saving}
+                onPress={handleContinue}
+                style={[styles.cta, selectedIds.length === 0 || continuing || saving ? styles.ctaDisabled : null]}>
                 <GardenText variant="button" color={GardenColors.white}>
-                  Continue to Planting
+                  {continuing ? 'Checking contacts...' : 'Continue to Planting'}
                 </GardenText>
               </Pressable>
             </View>
@@ -223,7 +263,7 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
               <GardenText variant="section">Where should these seeds grow?</GardenText>
               <GardenText variant="meta">Assign each friend to a circle and set reminder cadence.</GardenText>
               <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.seedPacketList}>
-                {selectedContacts.map((contact) => {
+                {contactsNeedingCircle.map((contact) => {
                   const activeCircle = circleById[contact.systemId] ?? 'Mid Circle';
                   return (
                     <GardenCard key={contact.systemId} style={styles.seedPacket}>

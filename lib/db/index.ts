@@ -2,6 +2,7 @@ export { initDatabase } from './sqlite';
 export {
   formatLastSpokeLabel,
   getAllContacts,
+  getContactsBySystemIds,
   getConfig,
   getFirstContactId,
   getGardenContacts,

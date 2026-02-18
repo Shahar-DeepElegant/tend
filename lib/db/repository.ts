@@ -237,6 +237,17 @@ export async function getAllContacts(): Promise<ContactRecord[]> {
   return rows.map(fromContactRow);
 }
 
+export async function getContactsBySystemIds(systemIds: string[]): Promise<ContactRecord[]> {
+  if (systemIds.length === 0) return [];
+  const db = await getDatabase();
+  const placeholders = systemIds.map(() => '?').join(', ');
+  const rows = await db.getAllAsync<ContactRowDb>(
+    `SELECT * FROM contacts WHERE system_id IN (${placeholders})`,
+    systemIds
+  );
+  return rows.map(fromContactRow);
+}
+
 async function listContactsForViews(): Promise<GardenContactRow[]> {
   const db = await getDatabase();
   const config = await getConfig();
