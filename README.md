@@ -1,50 +1,100 @@
-# Welcome to your Expo app 👋
+# Tend
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Tend is an open-source mobile app for people who want to stay close to friends and family without relying on memory.
 
-## Get started
+Life gets noisy. You forget to call, text, and check in, even when relationships matter deeply.  
+Tend treats your social circle like a garden: relationships need regular watering to stay healthy.
 
-1. Install dependencies
+Instead of asking "who should I reach out to next?", Tend cycles your contacts, highlights who is overdue, and helps you take action fast.
 
-   ```bash
-   npm install
-   ```
+## Problem -> Solution -> Impact
 
-2. Start the app
+**Problem**  
+Keeping relationships healthy is hard when life is busy, and most people can only track a few close connections in their head.
 
-   ```bash
-   npx expo start
-   ```
+**Solution**  
+Tend organizes your people into circles, tracks last contact, and reminds you when someone needs attention.
 
-In the output, you'll find options to open the app in a
+**Impact**  
+More consistent check-ins, fewer dropped connections, and stronger long-term relationships with the people you care about.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Features
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Garden-style contact view with Inner, Mid, and Outer circles
+- Up Next feed that surfaces overdue people first
+- One-tap "Water" actions to log interactions quickly
+- Contact import and contact-event syncing
+- Daily reminder notifications with configurable timing
+- Local SQLite storage with export support
 
-## Get a fresh project
+## Tech Stack
 
-When you're ready, run:
+- Expo + React Native + Expo Router
+- TypeScript
+- Expo Notifications + Background Task + Task Manager
+- Expo Contacts
+- Expo SQLite
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- npm
+- Expo-compatible environment for iOS and/or Android
+
+### Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run
 
-## Learn more
+```bash
+npm run start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+You can also run directly on a target:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```bash
+npm run android
+npm run ios
+npm run web
+```
 
-## Join the community
+## Scripts
 
-Join our community of developers creating universal apps.
+- `npm run start` - start Expo dev server
+- `npm run android` - open Android target
+- `npm run ios` - open iOS target
+- `npm run web` - run web target
+- `npm run lint` - run lint checks
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure
+
+- `app/` - routed screens (Garden, Up Next, Watering, Profile)
+- `components/` - shared UI primitives and themed components
+- `lib/db/` - SQLite models, migrations, and repository layer
+- `lib/notifications/` - notification and background reminder logic
+- `lib/contacts/` - contact provider and event sync logic
+
+## Product Design
+
+Tend uses a calm, organic "garden" design language:
+
+- Sage/terracotta/cream palette
+- Soft rounded surfaces and tactile UI
+- Relationship states represented as "Needs Water" vs "Thriving"
+
+See `spec/prd/overview.md` for the full product and UI direction.
+
+## Local Development Notes
+
+- The app currently uses the Expo managed workflow
+- Notifications and contacts require device permissions
+- Some capabilities behave differently on simulators vs physical devices
+
+## License
+
+This project is licensed under the MIT License. See `LICENSE`.
