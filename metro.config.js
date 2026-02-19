@@ -6,6 +6,9 @@ const config = getDefaultConfig(__dirname);
 
 // Add wasm asset support
 config.resolver.assetExts.push("wasm");
+if (!config.resolver.assetExts.includes("md")) {
+  config.resolver.assetExts.push("md");
+}
 
 // Add COEP and COOP headers to support SharedArrayBuffer
 config.server.enhanceMiddleware = (middleware) => {

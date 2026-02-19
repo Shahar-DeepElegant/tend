@@ -3,6 +3,7 @@
     "name": "friendly-reminder",
     "slug": "friendly-reminder",
     "version": "1.0.0",
+    "assetBundlePatterns": ["assets/images/*", "PRIVACY.md"],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "friendlyreminder",

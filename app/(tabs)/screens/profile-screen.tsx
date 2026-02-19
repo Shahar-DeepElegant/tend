@@ -36,6 +36,7 @@ import {
     type ProfileToggleId,
 } from "./profile.data";
 import { CustomCirclesModal } from "./profile/custom-circles-modal";
+import { PrivacyPolicyModal } from "./profile/privacy-policy-modal";
 import { ReminderFrequencyModal } from "./profile/reminder-frequency-modal";
 
 export function ProfileScreen() {
@@ -44,6 +45,7 @@ export function ProfileScreen() {
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
   const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
   const [busyActionId, setBusyActionId] = useState<"backup" | "export" | null>(
     null,
   );
@@ -245,7 +247,7 @@ export function ProfileScreen() {
                 Support
               </GardenText>
             </Pressable>
-            <Pressable>
+            <Pressable onPress={() => setPrivacyOpen(true)}>
               <GardenText
                 variant="meta"
                 style={styles.aboutLink}
@@ -294,6 +296,7 @@ export function ProfileScreen() {
             });
         }}
       />
+      <PrivacyPolicyModal visible={privacyOpen} onClose={() => setPrivacyOpen(false)} />
     </SafeAreaView>
   );
 }
