@@ -1,6 +1,6 @@
-import * as SQLite from 'expo-sqlite';
+import * as SQLite from "expo-sqlite";
 
-const DB_NAME = 'friendly-reminder.db';
+const DB_NAME = "tend.db";
 const TARGET_DB_VERSION = 2;
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
@@ -13,14 +13,14 @@ type ConfigSeed = {
 };
 
 const DEFAULT_CONFIG_ROWS: ConfigSeed[] = [
-  { key: 'default_cadence_inner_days', valueInt: 14 },
-  { key: 'default_cadence_mid_days', valueInt: 30 },
-  { key: 'default_cadence_outer_days', valueInt: 90 },
-  { key: 'fuzzy_reminders_enabled', valueBool: 1 },
-  { key: 'should_keep_reminders_persistent', valueBool: 1 },
-  { key: 'reminder_notification_time', valueText: '10:00' },
-  { key: 'contact_events_reminder_days', valueInt: 7 },
-  { key: 'automatic_logging', valueBool: 0 },
+  { key: "default_cadence_inner_days", valueInt: 14 },
+  { key: "default_cadence_mid_days", valueInt: 30 },
+  { key: "default_cadence_outer_days", valueInt: 90 },
+  { key: "fuzzy_reminders_enabled", valueBool: 1 },
+  { key: "should_keep_reminders_persistent", valueBool: 1 },
+  { key: "reminder_notification_time", valueText: "10:00" },
+  { key: "contact_events_reminder_days", valueInt: 7 },
+  { key: "automatic_logging", valueBool: 0 },
 ];
 
 async function migrateToV1(db: SQLite.SQLiteDatabase) {
@@ -65,19 +65,26 @@ async function migrateToV1(db: SQLite.SQLiteDatabase) {
   for (const row of DEFAULT_CONFIG_ROWS) {
     await db.runAsync(
       `INSERT OR IGNORE INTO app_config (key, value_text, value_int, value_bool) VALUES (?, ?, ?, ?)`,
-      [row.key, row.valueText ?? null, row.valueInt ?? null, row.valueBool ?? null]
+      [
+        row.key,
+        row.valueText ?? null,
+        row.valueInt ?? null,
+        row.valueBool ?? null,
+      ],
     );
   }
 }
 
 async function runMigrations(db: SQLite.SQLiteDatabase) {
-  const versionRow = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version');
+  const versionRow = await db.getFirstAsync<{ user_version: number }>(
+    "PRAGMA user_version",
+  );
   let currentVersion = versionRow?.user_version ?? 0;
 
   if (currentVersion < 1) {
     await migrateToV1(db);
     currentVersion = 1;
-    await db.execAsync('PRAGMA user_version = 1;');
+    await db.execAsync("PRAGMA user_version = 1;");
   }
 
   if (currentVersion < 2) {
@@ -109,11 +116,13 @@ async function runMigrations(db: SQLite.SQLiteDatabase) {
       CREATE INDEX IF NOT EXISTS idx_contact_events_next_occurrence ON contact_events(next_occurrence_at);
     `);
     currentVersion = 2;
-    await db.execAsync('PRAGMA user_version = 2;');
+    await db.execAsync("PRAGMA user_version = 2;");
   }
 
   if (currentVersion > TARGET_DB_VERSION) {
-    throw new Error(`Database version ${currentVersion} is newer than app version ${TARGET_DB_VERSION}`);
+    throw new Error(
+      `Database version ${currentVersion} is newer than app version ${TARGET_DB_VERSION}`,
+    );
   }
 }
 
@@ -122,7 +131,7 @@ export async function getDatabase() {
     dbPromise = (async () => {
       const db = await SQLite.openDatabaseAsync(DB_NAME);
       await runMigrations(db);
-      await db.execAsync('PRAGMA foreign_keys = ON;');
+      await db.execAsync("PRAGMA foreign_keys = ON;");
       return db;
     })();
   }

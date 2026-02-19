@@ -42,9 +42,12 @@ function buildCacheFileUri(fileName: string) {
   return `${FileSystem.cacheDirectory}${fileName}`;
 }
 
-export async function createDatabaseBackupFile(): Promise<{ uri: string; filename: string }> {
+export async function createDatabaseBackupFile(): Promise<{
+  uri: string;
+  filename: string;
+}> {
   const sourceDb = await getDatabase();
-  const filename = `friendly-reminder-backup-${buildTimestampToken()}.db`;
+  const filename = `tend-backup-${buildTimestampToken()}.db`;
   const destinationDb = await SQLite.openDatabaseAsync(filename);
 
   try {
@@ -58,8 +61,14 @@ export async function createDatabaseBackupFile(): Promise<{ uri: string; filenam
   }
 }
 
-export async function createXlsxExportFile(): Promise<{ uri: string; filename: string }> {
-  const [contacts, logs] = await Promise.all([getAllContactsForExport(), getAllLogsForExport()]);
+export async function createXlsxExportFile(): Promise<{
+  uri: string;
+  filename: string;
+}> {
+  const [contacts, logs] = await Promise.all([
+    getAllContactsForExport(),
+    getAllLogsForExport(),
+  ]);
   const workbook = XLSX.utils.book_new();
 
   const contactsSheet = XLSX.utils.json_to_sheet(contacts, {
@@ -72,8 +81,11 @@ export async function createXlsxExportFile(): Promise<{ uri: string; filename: s
   XLSX.utils.book_append_sheet(workbook, contactsSheet, "Contacts");
   XLSX.utils.book_append_sheet(workbook, logsSheet, "Logs");
 
-  const contentBase64 = XLSX.write(workbook, { bookType: "xlsx", type: "base64" });
-  const filename = `friendly-reminder-export-${buildTimestampToken()}.xlsx`;
+  const contentBase64 = XLSX.write(workbook, {
+    bookType: "xlsx",
+    type: "base64",
+  });
+  const filename = `tend-export-${buildTimestampToken()}.xlsx`;
   const uri = buildCacheFileUri(filename);
 
   await FileSystem.writeAsStringAsync(uri, contentBase64, {

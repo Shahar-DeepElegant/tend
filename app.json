@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "friendly-reminder",
-    "slug": "friendly-reminder",
+    "name": "tend",
+    "slug": "tend",
     "version": "1.0.0",
     "assetBundlePatterns": ["assets/images/*", "PRIVACY.md"],
     "orientation": "portrait",
