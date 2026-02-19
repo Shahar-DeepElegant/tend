@@ -16,6 +16,28 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
+## Development build (Expo Dev Client)
+
+Install the dev client (already added in this project):
+
+```bash
+npx expo install expo-dev-client
+```
+
+Create and run a native development build:
+
+```bash
+npm run android:dev
+# or
+npm run ios:dev
+```
+
+Start Metro for the development client:
+
+```bash
+npm run start:dev-client
+```
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)
