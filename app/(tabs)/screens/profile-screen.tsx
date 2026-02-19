@@ -1,4 +1,5 @@
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import Constants from "expo-constants";
 import * as Sharing from "expo-sharing";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
@@ -39,6 +40,7 @@ import { ReminderFrequencyModal } from "./profile/reminder-frequency-modal";
 
 export function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const appVersion = Constants.expoConfig?.version ?? "Unknown";
   const [config, setConfig] = useState<AppConfig | null>(null);
   const [customCirclesOpen, setCustomCirclesOpen] = useState(false);
   const [reminderFrequencyOpen, setReminderFrequencyOpen] = useState(false);
@@ -230,7 +232,7 @@ export function ProfileScreen() {
               color={GardenColors.sage}
             />
             <GardenText variant="meta" color="#5F6E5E">
-              Version 1.0.4 Sprout
+              {`Version ${appVersion}`}
             </GardenText>
           </View>
           <View style={styles.aboutLinks}>
