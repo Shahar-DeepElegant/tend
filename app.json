@@ -26,6 +26,8 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "expo-sqlite",
+      "expo-contacts",
       "expo-router",
       "expo-notifications",
       "expo-background-task",

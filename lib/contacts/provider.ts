@@ -1,4 +1,5 @@
 import { Platform } from 'react-native';
+import { Asset } from 'expo-asset';
 import * as Contacts from 'expo-contacts';
 
 export type ImportContact = {
@@ -9,15 +10,19 @@ export type ImportContact = {
 };
 
 const MOCK_CONTACTS: ImportContact[] = [
-  { systemId: 'web-sarah', fullName: 'Sarah Miller', nickName: null, imageUri: null },
-  { systemId: 'web-dad', fullName: 'Dad', nickName: null, imageUri: null },
-  { systemId: 'web-maya', fullName: 'Maya Torres', nickName: 'Maya', imageUri: null },
-  { systemId: 'web-alex', fullName: 'Alex Kim', nickName: null, imageUri: null },
-  { systemId: 'web-jordan', fullName: 'Jordan Patel', nickName: null, imageUri: null },
-  { systemId: 'web-rachel', fullName: 'Rachel Adams', nickName: null, imageUri: null },
-  { systemId: 'web-mom', fullName: 'Mom', nickName: null, imageUri: null },
-  { systemId: 'web-ben', fullName: 'Ben Wyatt', nickName: null, imageUri: null },
+  { systemId: 'web-sarah', fullName: 'Sarah Miller', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-01.jpg')) },
+  { systemId: 'web-dad', fullName: 'Dad', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-02.jpg')) },
+  { systemId: 'web-maya', fullName: 'Maya Torres', nickName: 'Maya', imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-03.jpg')) },
+  { systemId: 'web-alex', fullName: 'Alex Kim', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-04.jpg')) },
+  { systemId: 'web-jordan', fullName: 'Jordan Patel', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-05.jpg')) },
+  { systemId: 'web-rachel', fullName: 'Rachel Adams', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-06.jpg')) },
+  { systemId: 'web-mom', fullName: 'Mom', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-07.jpg')) },
+  { systemId: 'web-ben', fullName: 'Ben Wyatt', nickName: null, imageUri: imageUriFromModule(require('../../assets/stitch/seedling/images/seedling-img-01.jpg')) },
 ];
+
+function imageUriFromModule(moduleId: number) {
+  return Asset.fromModule(moduleId).uri;
+}
 
 function isWebMockEnabled() {
   return Platform.OS === 'web' && process.env.EXPO_PUBLIC_MOCK_CONTACTS_ON_WEB === 'true';
