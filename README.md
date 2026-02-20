@@ -32,8 +32,8 @@ Install the app from the [releases page](https://github.com/Shahar-DeepElegant/t
 
 ## Images
 
-![Garden View](./assets\images\garden.png)
-![Up Next Feed](./assets\images\up-next.png)
+![Garden View](./assets/images/garden.png)
+![Up Next Feed](./assets/images/up-next.png)
 
 ## Contributing
 
