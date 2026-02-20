@@ -276,12 +276,12 @@ function renderContacts(
           style={[
             styles.contactAvatar,
             {
-              left: `${point.leftPercent}%`,
-              top: `${point.topPercent}%`,
+              left: "50%",
+              top: "50%",
               width: size,
               height: size,
-              marginLeft: -size / 2,
-              marginTop: -size / 2,
+              marginLeft: -size / 2 + point.offsetXPx,
+              marginTop: -size / 2 + point.offsetYPx,
               borderRadius: size / 2,
               borderWidth,
               borderColor: contact.isOverdue ? GardenColors.sage : "#C6D9C5",
@@ -328,12 +328,12 @@ function OverflowAvatar({
       style={[
         styles.overflowAvatar,
         {
-          left: `${point.leftPercent}%`,
-          top: `${point.topPercent}%`,
+          left: "50%",
+          top: "50%",
           width: size,
           height: size,
-          marginLeft: -size / 2,
-          marginTop: -size / 2,
+          marginLeft: -size / 2 + point.offsetXPx,
+          marginTop: -size / 2 + point.offsetYPx,
           borderRadius: size / 2,
         },
       ]}

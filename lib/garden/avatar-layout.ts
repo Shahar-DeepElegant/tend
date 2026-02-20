@@ -1,6 +1,5 @@
 import type { CircleId } from "@/lib/db";
 
-const ORBIT_CANVAS_BASE_PX = 420;
 const ZOOM_BOOST_FACTOR = 4;
 
 export type RingLayoutConfig = {
@@ -13,8 +12,8 @@ export type RingLayoutConfig = {
 };
 
 export type OrbitPoint = {
-  leftPercent: number;
-  topPercent: number;
+  offsetXPx: number;
+  offsetYPx: number;
 };
 
 export type RingSlotResult<T> = {
@@ -58,10 +57,10 @@ function getSlotPoint(ring: CircleId, slotIndex: number, slotCount: number): Orb
   const config = RING_LAYOUT[ring];
   const angleDeg = config.angleOffsetDeg + (360 / Math.max(slotCount, 1)) * slotIndex;
   const angleRad = (angleDeg * Math.PI) / 180;
-  const radiusPercent = (getOrbitRadiusPx(ring) / ORBIT_CANVAS_BASE_PX) * 100;
+  const radiusPx = getOrbitRadiusPx(ring);
   return {
-    leftPercent: 50 + Math.cos(angleRad) * radiusPercent,
-    topPercent: 50 + Math.sin(angleRad) * radiusPercent,
+    offsetXPx: Math.cos(angleRad) * radiusPx,
+    offsetYPx: Math.sin(angleRad) * radiusPx,
   };
 }
 
