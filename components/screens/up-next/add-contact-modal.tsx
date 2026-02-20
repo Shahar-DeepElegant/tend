@@ -1,27 +1,47 @@
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Image } from 'expo-image';
-import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import { Image } from "expo-image";
+import { useEffect, useMemo, useState } from "react";
+import {
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    TextInput,
+    View,
+} from "react-native";
+import {
+    SafeAreaView,
+    useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-import { GardenCard, GardenText } from '@/components/ui/garden-primitives';
-import { GardenColors, GardenFonts, GardenRadius, GardenSpacing } from '@/constants/design-system';
-import { canImportContactsOnCurrentPlatform, listImportContacts, type ImportContact } from '@/lib/contacts/provider';
-import { getContactsBySystemIds, upsertContact } from '@/lib/db';
-import type { CircleId, ContactRecord } from '@/lib/db';
+import { GardenCard, GardenText } from "@/components/ui/garden-primitives";
+import {
+    GardenColors,
+    GardenFonts,
+    GardenRadius,
+    GardenSpacing,
+} from "@/constants/design-system";
+import {
+    canImportContactsOnCurrentPlatform,
+    listImportContacts,
+    type ImportContact,
+} from "@/lib/contacts/provider";
+import type { CircleId, ContactRecord } from "@/lib/db";
+import { getContactsBySystemIds, upsertContact } from "@/lib/db";
 
 type Step = 1 | 2;
-type Circle = 'Inner Circle' | 'Mid Circle' | 'Outer Circle';
+type Circle = "Inner Circle" | "Mid Circle" | "Outer Circle";
 
 const cadenceByCircle: Record<Circle, string> = {
-  'Inner Circle': 'Every 1-2 weeks',
-  'Mid Circle': 'Every month',
-  'Outer Circle': 'Every 3-6 months',
+  "Inner Circle": "Every 1-2 weeks",
+  "Mid Circle": "Every month",
+  "Outer Circle": "Every 3-6 months",
 };
 
 const circleByLabel: Record<Circle, CircleId> = {
-  'Inner Circle': 'inner',
-  'Mid Circle': 'mid',
-  'Outer Circle': 'outer',
+  "Inner Circle": "inner",
+  "Mid Circle": "mid",
+  "Outer Circle": "outer",
 };
 
 type AddContactModalProps = {
@@ -30,12 +50,21 @@ type AddContactModalProps = {
   onAdded?: () => void;
 };
 
-export function AddContactModal({ visible, onClose, onAdded }: AddContactModalProps) {
+export function AddContactModal({
+  visible,
+  onClose,
+  onAdded,
+}: AddContactModalProps) {
+  const insets = useSafeAreaInsets();
   const [step, setStep] = useState<Step>(1);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedContactById, setSelectedContactById] = useState<Record<string, ImportContact>>({});
-  const [existingContactsById, setExistingContactsById] = useState<Record<string, ContactRecord>>({});
+  const [selectedContactById, setSelectedContactById] = useState<
+    Record<string, ImportContact>
+  >({});
+  const [existingContactsById, setExistingContactsById] = useState<
+    Record<string, ContactRecord>
+  >({});
   const [circleById, setCircleById] = useState<Record<string, Circle>>({});
   const [sourceContacts, setSourceContacts] = useState<ImportContact[]>([]);
   const [loadingContacts, setLoadingContacts] = useState(false);
@@ -46,7 +75,7 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   useEffect(() => {
     if (!visible) {
       setStep(1);
-      setQuery('');
+      setQuery("");
       setSelectedIds([]);
       setSelectedContactById({});
       setExistingContactsById({});
@@ -56,7 +85,7 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
 
     let cancelled = false;
     setLoadingContacts(true);
-    listImportContacts('')
+    listImportContacts("")
       .then((contacts) => {
         if (cancelled) return;
         setSourceContacts(contacts);
@@ -88,8 +117,11 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   }, [query, visible]);
 
   const selectedContacts = useMemo(
-    () => selectedIds.map((id) => selectedContactById[id]).filter((contact): contact is ImportContact => !!contact),
-    [selectedContactById, selectedIds]
+    () =>
+      selectedIds
+        .map((id) => selectedContactById[id])
+        .filter((contact): contact is ImportContact => !!contact),
+    [selectedContactById, selectedIds],
   );
 
   const toggleSelected = (id: string) => {
@@ -113,17 +145,22 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
     if (!contact) return;
     setSelectedIds((current) => [...current, id]);
     setSelectedContactById((existing) => ({ ...existing, [id]: contact }));
-    setCircleById((existing) => ({ ...existing, [id]: existing[id] ?? 'Mid Circle' }));
+    setCircleById((existing) => ({
+      ...existing,
+      [id]: existing[id] ?? "Mid Circle",
+    }));
   };
 
-  const handleAddSeeds = async (existingByIdOverride?: Record<string, ContactRecord>) => {
+  const handleAddSeeds = async (
+    existingByIdOverride?: Record<string, ContactRecord>,
+  ) => {
     if (selectedContacts.length === 0) return;
     const existingById = existingByIdOverride ?? existingContactsById;
     setSaving(true);
     try {
       for (const contact of selectedContacts) {
         const existingContact = existingById[contact.systemId];
-        const selectedCircle = circleById[contact.systemId] ?? 'Mid Circle';
+        const selectedCircle = circleById[contact.systemId] ?? "Mid Circle";
         await upsertContact({
           systemId: contact.systemId,
           fullName: contact.fullName,
@@ -142,8 +179,11 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   };
 
   const contactsNeedingCircle = useMemo(
-    () => selectedContacts.filter((contact) => !existingContactsById[contact.systemId]),
-    [existingContactsById, selectedContacts]
+    () =>
+      selectedContacts.filter(
+        (contact) => !existingContactsById[contact.systemId],
+      ),
+    [existingContactsById, selectedContacts],
   );
 
   const handleContinue = async () => {
@@ -151,7 +191,9 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
     setContinuing(true);
     try {
       const existingContacts = await getContactsBySystemIds(selectedIds);
-      const nextExistingById = Object.fromEntries(existingContacts.map((contact) => [contact.systemId, contact]));
+      const nextExistingById = Object.fromEntries(
+        existingContacts.map((contact) => [contact.systemId, contact]),
+      );
       setExistingContactsById(nextExistingById);
 
       const hasNewContact = selectedIds.some((id) => !nextExistingById[id]);
@@ -167,16 +209,31 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
   };
 
   return (
-    <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
-      <SafeAreaView style={styles.modalOverlay}>
-        <View style={styles.modalSheet}>
+    <Modal
+      transparent
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <SafeAreaView style={styles.modalOverlay} edges={["top", "bottom"]}>
+        <View style={[styles.modalSheet]}>
           <View style={styles.modalHeader}>
             <Pressable onPress={onClose} style={styles.backBtn}>
-              <MaterialIcons name="close" size={22} color={GardenColors.forest} />
+              <MaterialIcons
+                name="close"
+                size={22}
+                color={GardenColors.forest}
+              />
             </Pressable>
             <View style={styles.stepDots}>
               {[1, 2].map((s) => (
-                <View key={s} style={[styles.stepDot, s <= step ? styles.stepDotActive : null]} />
+                <View
+                  key={s}
+                  style={[
+                    styles.stepDot,
+                    s <= step ? styles.stepDotActive : null,
+                  ]}
+                />
               ))}
             </View>
             <GardenText variant="meta" color={GardenColors.sage}>
@@ -186,19 +243,30 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
 
           {!canImport ? (
             <View style={styles.stepBody}>
-              <GardenText variant="section">Import not available on web</GardenText>
+              <GardenText variant="section">
+                Import not available on web
+              </GardenText>
               <GardenText variant="meta">
-                Set `EXPO_PUBLIC_MOCK_CONTACTS_ON_WEB=true` to mock contact source while still using SQLite.
+                Set `EXPO_PUBLIC_MOCK_CONTACTS_ON_WEB=true` to mock contact
+                source while still using SQLite.
               </GardenText>
             </View>
           ) : null}
 
           {canImport && step === 1 ? (
             <View style={styles.stepBody}>
-              <GardenText variant="section">Who would you like to plant?</GardenText>
-              <GardenText variant="meta">Select friends to add to your garden.</GardenText>
+              <GardenText variant="section">
+                Who would you like to plant?
+              </GardenText>
+              <GardenText variant="meta">
+                Select friends to add to your garden.
+              </GardenText>
               <View style={styles.searchWrap}>
-                <MaterialIcons name="search" size={20} color={GardenColors.stone} />
+                <MaterialIcons
+                  name="search"
+                  size={20}
+                  color={GardenColors.stone}
+                />
                 <TextInput
                   value={query}
                   onChangeText={setQuery}
@@ -207,7 +275,10 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                   style={styles.searchInput}
                 />
               </View>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.contactsList}>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.contactsList}
+              >
                 {loadingContacts ? (
                   <GardenText variant="meta" color={GardenColors.stone}>
                     Loading contacts...
@@ -223,25 +294,46 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                   return (
                     <Pressable
                       key={contact.systemId}
-                      style={[styles.contactRow, selected ? styles.contactRowSelected : null]}
-                      onPress={() => toggleSelected(contact.systemId)}>
+                      style={[
+                        styles.contactRow,
+                        selected ? styles.contactRowSelected : null,
+                      ]}
+                      onPress={() => toggleSelected(contact.systemId)}
+                    >
                       <View style={styles.contactLeft}>
                         {contact.imageUri ? (
-                          <Image source={contact.imageUri} style={styles.contactAvatar} />
+                          <Image
+                            source={contact.imageUri}
+                            style={styles.contactAvatar}
+                          />
                         ) : (
                           <View style={styles.contactInitials}>
-                            <GardenText variant="button" color={GardenColors.sage}>
+                            <GardenText
+                              variant="button"
+                              color={GardenColors.sage}
+                            >
                               {initialsFromName(contact.fullName)}
                             </GardenText>
                           </View>
                         )}
                         <View>
-                          <GardenText variant="body">{contact.fullName}</GardenText>
-                          <GardenText variant="meta">{contact.nickName || 'Contact'}</GardenText>
+                          <GardenText variant="body">
+                            {contact.fullName}
+                          </GardenText>
+                          <GardenText variant="meta">
+                            {contact.nickName || "Contact"}
+                          </GardenText>
                         </View>
                       </View>
-                      <View style={[styles.checkbox, selected ? styles.checkboxSelected : null]}>
-                        {selected ? <MaterialIcons name="check" size={16} color="#fff" /> : null}
+                      <View
+                        style={[
+                          styles.checkbox,
+                          selected ? styles.checkboxSelected : null,
+                        ]}
+                      >
+                        {selected ? (
+                          <MaterialIcons name="check" size={16} color="#fff" />
+                        ) : null}
                       </View>
                     </Pressable>
                   );
@@ -250,9 +342,15 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
               <Pressable
                 disabled={selectedIds.length === 0 || continuing || saving}
                 onPress={handleContinue}
-                style={[styles.cta, selectedIds.length === 0 || continuing || saving ? styles.ctaDisabled : null]}>
+                style={[
+                  styles.cta,
+                  selectedIds.length === 0 || continuing || saving
+                    ? styles.ctaDisabled
+                    : null,
+                ]}
+              >
                 <GardenText variant="button" color={GardenColors.white}>
-                  {continuing ? 'Checking contacts...' : 'Continue to Planting'}
+                  {continuing ? "Checking contacts..." : "Continue to Planting"}
                 </GardenText>
               </Pressable>
             </View>
@@ -260,19 +358,36 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
 
           {canImport && step === 2 ? (
             <View style={styles.stepBody}>
-              <GardenText variant="section">Where should these seeds grow?</GardenText>
-              <GardenText variant="meta">Assign each friend to a circle and set reminder cadence.</GardenText>
-              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.seedPacketList}>
+              <GardenText variant="section">
+                Where should these seeds grow?
+              </GardenText>
+              <GardenText variant="meta">
+                Assign each friend to a circle and set reminder cadence.
+              </GardenText>
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.seedPacketList}
+              >
                 {contactsNeedingCircle.map((contact) => {
-                  const activeCircle = circleById[contact.systemId] ?? 'Mid Circle';
+                  const activeCircle =
+                    circleById[contact.systemId] ?? "Mid Circle";
                   return (
-                    <GardenCard key={contact.systemId} style={styles.seedPacket}>
+                    <GardenCard
+                      key={contact.systemId}
+                      style={styles.seedPacket}
+                    >
                       <View style={styles.contactLeft}>
                         {contact.imageUri ? (
-                          <Image source={contact.imageUri} style={styles.contactAvatar} />
+                          <Image
+                            source={contact.imageUri}
+                            style={styles.contactAvatar}
+                          />
                         ) : (
                           <View style={styles.contactInitials}>
-                            <GardenText variant="button" color={GardenColors.sage}>
+                            <GardenText
+                              variant="button"
+                              color={GardenColors.sage}
+                            >
                               {initialsFromName(contact.fullName)}
                             </GardenText>
                           </View>
@@ -281,29 +396,60 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                           <GardenText variant="meta" color={GardenColors.sage}>
                             Seed Packet
                           </GardenText>
-                          <GardenText variant="body">{contact.fullName}</GardenText>
+                          <GardenText variant="body">
+                            {contact.fullName}
+                          </GardenText>
                         </View>
                       </View>
                       <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={styles.circlePicker}>
-                        {(['Inner Circle', 'Mid Circle', 'Outer Circle'] as Circle[]).map((circle) => (
+                        contentContainerStyle={styles.circlePicker}
+                      >
+                        {(
+                          [
+                            "Inner Circle",
+                            "Mid Circle",
+                            "Outer Circle",
+                          ] as Circle[]
+                        ).map((circle) => (
                           <Pressable
                             key={circle}
-                            onPress={() => setCircleById((current) => ({ ...current, [contact.systemId]: circle }))}
-                            style={[styles.circleChip, activeCircle === circle ? styles.circleChipActive : null]}>
+                            onPress={() =>
+                              setCircleById((current) => ({
+                                ...current,
+                                [contact.systemId]: circle,
+                              }))
+                            }
+                            style={[
+                              styles.circleChip,
+                              activeCircle === circle
+                                ? styles.circleChipActive
+                                : null,
+                            ]}
+                          >
                             <GardenText
                               variant="meta"
-                              color={activeCircle === circle ? GardenColors.white : GardenColors.forest}>
+                              color={
+                                activeCircle === circle
+                                  ? GardenColors.white
+                                  : GardenColors.forest
+                              }
+                            >
                               {circle}
                             </GardenText>
                           </Pressable>
                         ))}
                       </ScrollView>
                       <View style={styles.cadenceRow}>
-                        <MaterialIcons name="schedule" size={16} color={GardenColors.stone} />
-                        <GardenText variant="meta">{cadenceByCircle[activeCircle]}</GardenText>
+                        <MaterialIcons
+                          name="schedule"
+                          size={16}
+                          color={GardenColors.stone}
+                        />
+                        <GardenText variant="meta">
+                          {cadenceByCircle[activeCircle]}
+                        </GardenText>
                       </View>
                     </GardenCard>
                   );
@@ -314,9 +460,10 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
                   void handleAddSeeds();
                 }}
                 style={[styles.cta, saving ? styles.ctaDisabled : null]}
-                disabled={saving}>
+                disabled={saving}
+              >
                 <GardenText variant="button" color={GardenColors.white}>
-                  {saving ? 'Adding...' : 'Add Seeds to Garden'}
+                  {saving ? "Adding..." : "Add Seeds to Garden"}
                 </GardenText>
               </Pressable>
             </View>
@@ -328,8 +475,8 @@ export function AddContactModal({ visible, onClose, onAdded }: AddContactModalPr
 }
 
 function initialsFromName(name: string) {
-  const parts = name.split(' ').filter(Boolean);
-  if (parts.length === 0) return '?';
+  const parts = name.split(" ").filter(Boolean);
+  if (parts.length === 0) return "?";
   if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase();
   return `${parts[0].slice(0, 1)}${parts[parts.length - 1].slice(0, 1)}`.toUpperCase();
 }
@@ -337,12 +484,12 @@ function initialsFromName(name: string) {
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(44, 54, 43, 0.34)',
-    justifyContent: 'flex-end',
+    backgroundColor: "rgba(44, 54, 43, 0.34)",
+    justifyContent: "flex-end",
   },
   modalSheet: {
     flex: 1,
-    height: '100%',
+    height: "100%",
     borderTopLeftRadius: 0,
     borderTopRightRadius: 0,
     backgroundColor: GardenColors.cream,
@@ -351,31 +498,31 @@ const styles = StyleSheet.create({
     paddingBottom: GardenSpacing.md,
   },
   modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: GardenSpacing.sm,
   },
   backBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: GardenColors.white,
     borderWidth: 1,
     borderColor: GardenColors.border,
   },
   stepDots: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
   stepDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#DCE8DB',
+    backgroundColor: "#DCE8DB",
   },
   stepDotActive: {
     width: 20,
@@ -387,8 +534,8 @@ const styles = StyleSheet.create({
     gap: GardenSpacing.sm,
   },
   searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: GardenSpacing.xs,
     borderWidth: 1,
     borderColor: GardenColors.border,
@@ -408,9 +555,9 @@ const styles = StyleSheet.create({
     paddingBottom: GardenSpacing.sm,
   },
   contactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
     borderColor: GardenColors.border,
     backgroundColor: GardenColors.white,
@@ -419,20 +566,20 @@ const styles = StyleSheet.create({
   },
   contactRowSelected: {
     borderColor: GardenColors.sage,
-    backgroundColor: '#EFF5EE',
+    backgroundColor: "#EFF5EE",
   },
   contactLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: GardenSpacing.sm,
   },
   contactInitials: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E9F1E8',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#E9F1E8",
   },
   contactAvatar: {
     width: 48,
@@ -444,18 +591,18 @@ const styles = StyleSheet.create({
     height: 24,
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#C2CEC2',
+    borderColor: "#C2CEC2",
   },
   checkboxSelected: {
     borderColor: GardenColors.sage,
     backgroundColor: GardenColors.sage,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   cta: {
-    marginTop: 'auto',
-    alignItems: 'center',
-    justifyContent: 'center',
+    marginTop: "auto",
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: GardenRadius.chip,
     backgroundColor: GardenColors.sage,
     height: 52,
@@ -486,8 +633,8 @@ const styles = StyleSheet.create({
     backgroundColor: GardenColors.sage,
   },
   cadenceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
   },
 });

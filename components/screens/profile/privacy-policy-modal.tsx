@@ -15,7 +15,7 @@ import {
 
 import { GardenText } from "@/components/ui/garden-primitives";
 import { GardenColors, GardenSpacing } from "@/constants/design-system";
-import privacyPolicyMarkdown from "../../../../PRIVACY.md";
+import privacyPolicyMarkdown from "../../../PRIVACY.md";
 
 type PrivacyPolicyModalProps = {
   visible: boolean;

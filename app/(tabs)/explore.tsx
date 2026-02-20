@@ -1,3 +1,3 @@
-import { GardenScreen } from './screens/garden-screen';
+import { GardenScreen } from '@/components/screens/garden-screen';
 
 export default GardenScreen;

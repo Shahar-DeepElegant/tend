@@ -31,7 +31,11 @@ import {
     type CircleId,
     type GardenContactRow,
 } from "@/lib/db";
-import { RING_LAYOUT, layoutRingItems, type OrbitPoint } from "@/lib/garden/avatar-layout";
+import {
+    RING_LAYOUT,
+    layoutRingItems,
+    type OrbitPoint,
+} from "@/lib/garden/avatar-layout";
 
 import { AddContactModal } from "./up-next/add-contact-modal";
 

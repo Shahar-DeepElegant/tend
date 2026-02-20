@@ -1,4 +1,3 @@
-import { LeafProfileScreen } from './screens/leaf-profile-screen';
+import { LeafProfileScreen } from '@/components/screens/leaf-profile-screen';
 
 export default LeafProfileScreen;
-

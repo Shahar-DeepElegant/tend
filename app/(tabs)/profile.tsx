@@ -1,4 +1,3 @@
-import { ProfileScreen } from './screens/profile-screen';
+import { ProfileScreen } from '@/components/screens/profile-screen';
 
 export default ProfileScreen;
-
