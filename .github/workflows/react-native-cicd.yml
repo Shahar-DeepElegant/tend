@@ -19,6 +19,9 @@ on:
           - publish-stores
           - all
 
+permissions:
+  contents: write
+
 env:
   EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
   GOOGLE_PLAY_SERVICE_ACCOUNT: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT }}
