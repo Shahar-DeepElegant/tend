@@ -294,6 +294,11 @@ export async function updateContactFields(systemId: string, patch: ContactUpdate
     args.push(patch.description);
   }
 
+  if (patch.circleId !== undefined) {
+    clauses.push('circle_id = ?');
+    args.push(patch.circleId);
+  }
+
   if (patch.customReminderDays !== undefined) {
     clauses.push('custom_reminder_days = ?');
     args.push(patch.customReminderDays);

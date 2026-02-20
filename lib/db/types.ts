@@ -24,6 +24,7 @@ export type ContactInput = {
 
 export type ContactUpdatePatch = {
   description?: string | null;
+  circleId?: CircleId;
   customReminderDays?: number | null;
 };
 

@@ -25,8 +25,10 @@ import {
 } from "@/constants/design-system";
 import {
   deleteContact,
+  getConfig,
   getFirstContactId,
   getLeafProfileData,
+  type CircleId,
   updateContactFields,
 } from "@/lib/db";
 import type { ContactLogRecord, LeafProfileData } from "@/lib/db/types";
@@ -43,6 +45,15 @@ type ContactChannels = {
 };
 
 const CADENCE_PRESETS = [7, 14, 30, 90];
+
+const CIRCLE_OPTIONS: {
+  value: CircleId;
+  label: string;
+}[] = [
+  { value: "inner", label: "Inner Circle" },
+  { value: "mid", label: "Mid Circle" },
+  { value: "outer", label: "Outer Circle" },
+];
 
 const MESSAGE_CHANNEL_OPTIONS: {
   key: MessageChannel;
@@ -70,8 +81,18 @@ export function LeafProfileScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ contactId?: string }>();
   const [profile, setProfile] = useState<LeafProfileData | null>(null);
+  const [circleCadenceHints, setCircleCadenceHints] = useState<
+    Record<CircleId, string>
+  >({
+    inner: "Every 14 days",
+    mid: "Every 30 days",
+    outer: "Every 90 days",
+  });
   const [messageModalVisible, setMessageModalVisible] = useState(false);
   const [cadenceModalVisible, setCadenceModalVisible] = useState(false);
+  const [circleModalVisible, setCircleModalVisible] = useState(false);
+  const [circleDraft, setCircleDraft] = useState<CircleId>("mid");
+  const [circleSaving, setCircleSaving] = useState(false);
   const [cadenceDraft, setCadenceDraft] = useState("");
   const [cadenceSaving, setCadenceSaving] = useState(false);
   const [soilDraft, setSoilDraft] = useState("");
@@ -91,8 +112,16 @@ export function LeafProfileScreen() {
       setProfile(null);
       return;
     }
-    const data = await getLeafProfileData(targetId);
+    const [data, config] = await Promise.all([
+      getLeafProfileData(targetId),
+      getConfig(),
+    ]);
     setProfile(data);
+    setCircleCadenceHints({
+      inner: formatCadenceDays(config.defaultCadenceInnerDays),
+      mid: formatCadenceDays(config.defaultCadenceMidDays),
+      outer: formatCadenceDays(config.defaultCadenceOuterDays),
+    });
   }, [params.contactId]);
 
   useFocusEffect(
@@ -160,6 +189,29 @@ export function LeafProfileScreen() {
     setCadenceDraft(String(profile.effectiveCadenceDays));
     setCadenceModalVisible(true);
   }, [profile]);
+
+  const openCircleModal = useCallback(() => {
+    if (!profile) return;
+    setCircleDraft(profile.contact.circleId);
+    setCircleModalVisible(true);
+  }, [profile]);
+
+  const handleSaveCircle = useCallback(async () => {
+    if (!profile || circleSaving) return;
+    setCircleSaving(true);
+    try {
+      await updateContactFields(profile.contact.systemId, {
+        circleId: circleDraft,
+        customReminderDays: null,
+      });
+      setCircleModalVisible(false);
+      await reload();
+    } catch {
+      Alert.alert("Unable to update circle", "Please try again.");
+    } finally {
+      setCircleSaving(false);
+    }
+  }, [circleDraft, circleSaving, profile, reload]);
 
   const handleSaveCadence = useCallback(async () => {
     if (!profile || cadenceSaving) return;
@@ -331,10 +383,23 @@ export function LeafProfileScreen() {
           <GardenText variant="title" style={styles.name}>
             {profile.contact.fullName}
           </GardenText>
-          <View style={styles.relationPill}>
-            <GardenText variant="button" color="#3A5D38">
-              {profile.contact.circleId.toUpperCase()} CIRCLE
-            </GardenText>
+          <View style={styles.relationRow}>
+            <View style={styles.relationPill}>
+              <GardenText variant="button" color="#3A5D38">
+                {profile.contact.circleId.toUpperCase()} CIRCLE
+              </GardenText>
+            </View>
+            <Pressable
+              style={[
+                styles.relationEditButton,
+                circleSaving ? styles.disabledAction : null,
+              ]}
+              onPress={openCircleModal}
+              disabled={circleSaving}
+              accessibilityLabel="Edit circle type"
+            >
+              <MaterialIcons name="edit" size={16} color={GardenColors.sage} />
+            </Pressable>
           </View>
         </View>
 
@@ -521,6 +586,85 @@ export function LeafProfileScreen() {
       >
         <MaterialIcons name="water-drop" size={32} color={GardenColors.white} />
       </Pressable>
+
+      <Modal
+        transparent
+        visible={circleModalVisible}
+        animationType="fade"
+        onRequestClose={() => setCircleModalVisible(false)}
+      >
+        <SafeAreaView style={styles.modalOverlay}>
+          <View style={styles.smallModalCard}>
+            <View style={styles.modalHeader}>
+              <GardenText variant="section">Edit circle type</GardenText>
+              <Pressable
+                onPress={() => setCircleModalVisible(false)}
+                style={styles.modalCloseBtn}
+              >
+                <MaterialIcons
+                  name="close"
+                  size={20}
+                  color={GardenColors.forest}
+                />
+              </Pressable>
+            </View>
+
+            <GardenText variant="meta" color="#617260">
+              Changing the circle type updates when we remind you to call them.
+            </GardenText>
+            <GardenText variant="meta" color="#617260">
+              If this contact has a custom cadence, changing circle type resets
+              it to the circle default.
+            </GardenText>
+
+            <View style={styles.circleOptionsWrap}>
+              {CIRCLE_OPTIONS.map((option) => {
+                const selected = option.value === circleDraft;
+                return (
+                  <Pressable
+                    key={option.value}
+                    style={[
+                      styles.circleOption,
+                      selected ? styles.circleOptionActive : null,
+                    ]}
+                    onPress={() => setCircleDraft(option.value)}
+                  >
+                    <GardenText
+                      variant="body"
+                      color={selected ? GardenColors.white : GardenColors.forest}
+                    >
+                      {option.label}
+                    </GardenText>
+                    <GardenText
+                      variant="meta"
+                      color={
+                        selected ? "rgba(255,255,255,0.9)" : GardenColors.stone
+                      }
+                    >
+                      {circleCadenceHints[option.value]}
+                    </GardenText>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[
+                  styles.primaryBtn,
+                  circleSaving ? styles.disabledAction : null,
+                ]}
+                onPress={handleSaveCircle}
+                disabled={circleSaving}
+              >
+                <GardenText variant="button" color={GardenColors.white}>
+                  {circleSaving ? "Saving..." : "Save circle"}
+                </GardenText>
+              </Pressable>
+            </View>
+          </View>
+        </SafeAreaView>
+      </Modal>
 
       <Modal
         transparent
@@ -720,6 +864,10 @@ function formatShortDate(iso: string) {
     month: "short",
     day: "numeric",
   });
+}
+
+function formatCadenceDays(days: number) {
+  return `Every ${days} day${days === 1 ? "" : "s"}`;
 }
 
 function initialsFromName(name: string) {
@@ -1018,6 +1166,21 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     backgroundColor: "#E8F0E8",
   },
+  relationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  relationEditButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: GardenColors.white,
+    borderWidth: 1,
+    borderColor: GardenColors.border,
+  },
   quickActions: {
     flexDirection: "row",
     gap: 10,
@@ -1227,6 +1390,18 @@ const styles = StyleSheet.create({
     paddingBottom: GardenSpacing.md,
     gap: GardenSpacing.sm,
   },
+  smallModalCard: {
+    marginHorizontal: GardenSpacing.md,
+    marginVertical: "auto",
+    borderRadius: 24,
+    backgroundColor: GardenColors.cream,
+    paddingHorizontal: GardenSpacing.md,
+    paddingTop: GardenSpacing.md,
+    paddingBottom: GardenSpacing.md,
+    gap: GardenSpacing.sm,
+    borderWidth: 1,
+    borderColor: GardenColors.border,
+  },
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -1263,6 +1438,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#E8F0E8",
     alignItems: "center",
     justifyContent: "center",
+  },
+  circleOptionsWrap: {
+    gap: 8,
+  },
+  circleOption: {
+    gap: 4,
+    borderWidth: 1,
+    borderColor: GardenColors.border,
+    borderRadius: 14,
+    backgroundColor: GardenColors.white,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  circleOptionActive: {
+    borderColor: GardenColors.sage,
+    backgroundColor: GardenColors.sage,
   },
   cadenceChips: {
     flexDirection: "row",
