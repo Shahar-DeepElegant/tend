@@ -14,6 +14,7 @@ import {
 } from "@/lib/db";
 
 const BACKGROUND_REMINDER_TASK = "tend.daily-sync-and-notify";
+const BACKGROUND_TASK_MIN_INTERVAL_MINUTES = 60;
 const OVERDUE_NOTIFICATION_ID = "tend.overdue";
 const EVENTS_NOTIFICATION_ID = "tend.events";
 const OVERDUE_CHANNEL_ID = "tend-overdue";
@@ -244,7 +245,6 @@ async function shouldRunEvaluationToday(
 if (!TaskManager.isTaskDefined(BACKGROUND_REMINDER_TASK)) {
   TaskManager.defineTask(BACKGROUND_REMINDER_TASK, async () => {
     try {
-      await syncDeviceContactEventsOncePerDay();
       await runDailyReminderEvaluation({ source: "background" });
       return BackgroundTask.BackgroundTaskResult.Success;
     } catch {
@@ -271,7 +271,13 @@ export async function runDailyReminderEvaluation({
   );
   if (!shouldRun) return false;
 
-  await syncDeviceContactEventsOncePerDay();
+  if (source !== "background") {
+    try {
+      await syncDeviceContactEventsOncePerDay({ allowPermissionPrompt: true });
+    } catch {
+      // Keep reminder evaluation independent from contact sync failures.
+    }
+  }
   await evaluateOverdueReminders(now);
   await evaluateEventReminders(now);
   await setNotificationState(
@@ -303,9 +309,21 @@ async function registerBackgroundTask() {
   const isRegistered = await TaskManager.isTaskRegisteredAsync(
     BACKGROUND_REMINDER_TASK,
   );
-  if (isRegistered) return;
+  if (isRegistered) {
+    try {
+      const options = await TaskManager.getTaskOptionsAsync<{
+        minimumInterval?: number;
+      }>(BACKGROUND_REMINDER_TASK);
+      if (options?.minimumInterval === BACKGROUND_TASK_MIN_INTERVAL_MINUTES) {
+        return;
+      }
+    } catch {
+      // If task options cannot be read, re-register with the expected interval.
+    }
+    await BackgroundTask.unregisterTaskAsync(BACKGROUND_REMINDER_TASK);
+  }
   await BackgroundTask.registerTaskAsync(BACKGROUND_REMINDER_TASK, {
-    minimumInterval: 24 * 60,
+    minimumInterval: BACKGROUND_TASK_MIN_INTERVAL_MINUTES,
   });
 }
 
