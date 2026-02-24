@@ -26,7 +26,10 @@ import {
   createDatabaseBackupFile,
   createXlsxExportFile,
 } from "@/lib/export/profile-export";
-import { rescheduleOnConfigChange } from "@/lib/notifications";
+import {
+  refreshReminderNotificationSchedule,
+  rescheduleOnConfigChange,
+} from "@/lib/notifications";
 
 import {
     profileActions,
@@ -65,6 +68,7 @@ export function ProfileScreen() {
     if (!config) return;
     if (toggleId === "fuzzyReminders") {
       await updateConfig({ fuzzyRemindersEnabled: value });
+      await refreshReminderNotificationSchedule({ reason: "data" });
       setConfig({ ...config, fuzzyRemindersEnabled: value });
       return;
     }
@@ -274,7 +278,14 @@ export function ProfileScreen() {
             defaultCadenceInnerDays: value.inner,
             defaultCadenceMidDays: value.mid,
             defaultCadenceOuterDays: value.outer,
-          }).then(reload);
+          })
+            .then(async () => {
+              await reload();
+              await refreshReminderNotificationSchedule({ reason: "data" });
+            })
+            .catch((error) => {
+              console.error("Failed to update default cadence", error);
+            });
         }}
       />
       <ReminderFrequencyModal
