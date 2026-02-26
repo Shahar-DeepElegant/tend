@@ -28,6 +28,7 @@ import {
 } from "@/lib/contacts/provider";
 import type { CircleId, ContactRecord } from "@/lib/db";
 import { getContactsBySystemIds, upsertContact } from "@/lib/db";
+import { refreshReminderNotificationSchedule } from "@/lib/notifications";
 
 type Step = 1 | 2;
 type Circle = "Inner Circle" | "Mid Circle" | "Outer Circle";
@@ -171,6 +172,10 @@ export function AddContactModal({
           customReminderDays: existingContact?.customReminderDays ?? null,
         });
       }
+      await refreshReminderNotificationSchedule({
+        reason: "data",
+        forceSyncContacts: true,
+      });
       onAdded?.();
       onClose();
     } finally {

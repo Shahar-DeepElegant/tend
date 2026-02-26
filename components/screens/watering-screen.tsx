@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { GardenText } from '@/components/ui/garden-primitives';
 import { GardenColors, GardenRadius, GardenSpacing } from '@/constants/design-system';
 import { getFirstContactId, getLeafProfileData, insertContactLog } from '@/lib/db/repository';
-import { clearOverduePersistentIfResolved } from '@/lib/notifications';
+import { refreshReminderNotificationSchedule } from '@/lib/notifications';
 
 import { interactionOptions, type WateringInteraction } from './watering.data';
 
@@ -54,7 +54,7 @@ export function WateringScreen() {
     try {
       const summary = `${interaction}: ${notes.trim() || 'No summary provided.'}`;
       await insertContactLog({ contactSystemId: contact.id, summary });
-      await clearOverduePersistentIfResolved();
+      await refreshReminderNotificationSchedule({ reason: 'data' });
       router.back();
     } finally {
       setSaving(false);

@@ -59,11 +59,25 @@ function mapSystemEvents(contact: Contacts.Contact): ContactEventInput[] {
   return events;
 }
 
-export async function syncDeviceContactEvents(force = false) {
+async function hasContactsPermission(allowPermissionPrompt: boolean) {
+  const current = await Contacts.getPermissionsAsync();
+  if (current.status === 'granted') return true;
+  if (!allowPermissionPrompt) return false;
+  const requested = await Contacts.requestPermissionsAsync();
+  return requested.status === 'granted';
+}
+
+export async function syncDeviceContactEvents({
+  force = false,
+  allowPermissionPrompt = true,
+}: {
+  force?: boolean;
+  allowPermissionPrompt?: boolean;
+} = {}) {
   if (Platform.OS === 'web') return;
 
-  const permission = await Contacts.requestPermissionsAsync();
-  if (permission.status !== 'granted') return;
+  const granted = await hasContactsPermission(allowPermissionPrompt);
+  if (!granted) return;
 
   const trackedContacts = await getAllContacts();
   for (const trackedContact of trackedContacts) {
@@ -84,11 +98,15 @@ export async function syncDeviceContactEvents(force = false) {
   }
 }
 
-export async function syncDeviceContactEventsOncePerDay() {
+export async function syncDeviceContactEventsOncePerDay({
+  allowPermissionPrompt = true,
+}: {
+  allowPermissionPrompt?: boolean;
+} = {}) {
   const today = toLocalDateKey();
   const lastRun = await getNotificationState(LAST_EVENT_SYNC_LOCAL_DATE_KEY);
   if (lastRun?.valueText === today) return false;
-  await syncDeviceContactEvents(true);
+  await syncDeviceContactEvents({ force: true, allowPermissionPrompt });
   return true;
 }
 

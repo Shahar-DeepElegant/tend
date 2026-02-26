@@ -32,7 +32,7 @@ import {
   updateContactFields,
 } from "@/lib/db";
 import type { ContactLogRecord, LeafProfileData } from "@/lib/db/types";
-import { runDailyReminderEvaluation } from "@/lib/notifications";
+import { refreshReminderNotificationSchedule } from "@/lib/notifications";
 
 type GrowthRingType = "coffee" | "call" | "text" | "email";
 type MessageChannel = "whatsapp" | "telegram" | "instagram" | "mail";
@@ -204,6 +204,7 @@ export function LeafProfileScreen() {
         circleId: circleDraft,
         customReminderDays: null,
       });
+      await refreshReminderNotificationSchedule({ reason: "data" });
       setCircleModalVisible(false);
       await reload();
     } catch {
@@ -226,6 +227,7 @@ export function LeafProfileScreen() {
       await updateContactFields(profile.contact.systemId, {
         customReminderDays: parsedDays,
       });
+      await refreshReminderNotificationSchedule({ reason: "data" });
       setCadenceModalVisible(false);
       await reload();
     } catch {
@@ -242,6 +244,7 @@ export function LeafProfileScreen() {
       await updateContactFields(profile.contact.systemId, {
         customReminderDays: null,
       });
+      await refreshReminderNotificationSchedule({ reason: "data" });
       setCadenceModalVisible(false);
       await reload();
     } catch {
@@ -298,7 +301,7 @@ export function LeafProfileScreen() {
               setDeleteBusy(true);
               try {
                 await deleteContact(profile.contact.systemId);
-                await runDailyReminderEvaluation({ source: "focus", force: true });
+                await refreshReminderNotificationSchedule({ reason: "data" });
                 router.replace("/");
               } catch {
                 Alert.alert("Unable to delete contact", "Please try again.");
