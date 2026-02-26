@@ -2,7 +2,7 @@ name: React Native CI/CD
 
 on:
   push:
-    branches: [main, master, shahar/notifications-fix]
+    branches: [main, master]
     paths-ignore:
       - "**.md"
       - "LICENSE"
