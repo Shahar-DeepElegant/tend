@@ -17,6 +17,10 @@ Tend treats your social circle like a garden: relationships need regular waterin
 
 Instead of asking "who should I reach out to next?", Tend cycles your contacts, highlights who is overdue, and helps you take action fast.
 
+## Video Demonstration
+
+![](./assets/video/demonstration.mp4)
+
 ## Features
 
 - Garden-style contact view with Inner, Mid, and Outer circles
