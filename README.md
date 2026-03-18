@@ -19,7 +19,7 @@ Instead of asking "who should I reach out to next?", Tend cycles your contacts, 
 
 ## Video Demonstration
 
-![](./assets/video/demonstration.mp4)
+[![Watch the video](https://img.youtube.com/vi/0CC-tz9yzkw/0.jpg)](https://www.youtube.com/watch?v=0CC-tz9yzkw)
 
 ## Features
 
